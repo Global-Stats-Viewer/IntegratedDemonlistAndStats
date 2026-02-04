@@ -1,4 +1,8 @@
 # Integrated Demonlist Changelog
+## v1.7.13 (2026-02-04)
+- Ported to Geometry Dash v2.208 / Geode SDK v5.0.0
+- Changed the page randomization algorithm from Mersenne Twister to RomuTrio
+
 ## v1.7.12 (2025-10-19)
 - Fixed a bug where the second placement of two-player demons would be incorrect
 

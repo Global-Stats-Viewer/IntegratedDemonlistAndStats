@@ -9,10 +9,10 @@ public:
 
     void search();
     void page(int);
-    void keyDown(cocos2d::enumKeyCodes) override;
+    void keyDown(cocos2d::enumKeyCodes, double) override;
     void keyBackClicked() override;
 protected:
-    geode::EventListener<geode::utils::web::WebTask> m_aredlListener;
+    geode::async::TaskHolder<geode::utils::web::WebResponse> m_aredlListener;
     GJListLayer* m_list;
     cocos2d::CCLabelBMFont* m_listLabel;
     LoadingCircle* m_loadingCircle;
@@ -31,7 +31,7 @@ protected:
     int m_page = 0;
     std::string m_query;
     std::vector<IDDemonPack> m_fullSearchResults;
-    std::function<void(int)> m_aredlFailure;
+    geode::CopyableFunction<void(int)> m_aredlFailure;
 
     bool init() override;
     void showLoading();

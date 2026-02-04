@@ -26,7 +26,13 @@ public:
     static bool aredlLoaded;
     static bool pemonlistLoaded;
 
-    static void loadAREDL(geode::EventListener<geode::utils::web::WebTask>&, std::function<void()>, std::function<void(int)>);
-    static void loadAREDLPacks(geode::EventListener<geode::utils::web::WebTask>&, std::function<void()>, std::function<void(int)>);
-    static void loadPemonlist(geode::EventListener<geode::utils::web::WebTask>&, std::function<void()>, std::function<void(int)>);
+    static void loadAREDL(
+        geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>
+    );
+    static void loadAREDLPacks(
+        geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>
+    );
+    static void loadPemonlist(
+        geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>
+    );
 };

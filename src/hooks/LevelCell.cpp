@@ -10,12 +10,12 @@ constexpr const char* aredlLevelUrl = "https://api.aredl.net/v2/api/aredl/levels
 constexpr const char* aredlLevel2pUrl = "https://api.aredl.net/v2/api/aredl/levels/{}_2p";
 constexpr const char* pemonlistLevelUrl = "https://pemonlist.com/api/level/{}?version=2";
 
+static std::set<int> loadedDemons;
+
 class $modify(IDLevelCell, LevelCell) {
     struct Fields {
-        EventListener<web::WebTask> m_listener;
+        async::TaskHolder<web::WebResponse> m_listener;
     };
-
-    inline static std::set<int> loadedDemons;
 
     static void onModify(ModifyBase<ModifyDerive<IDLevelCell, LevelCell>>& self) {
         (void)self.setHookPriorityAfterPost("LevelCell::loadFromLevel", "hiimjustin000.level_size");
@@ -40,18 +40,14 @@ class $modify(IDLevelCell, LevelCell) {
         if (loadedDemons.contains(levelID)) return;
         loadedDemons.insert(levelID);
 
-        auto f = m_fields.self();
-        f->m_listener.bind([
-            this,
-            levelID,
-            levelName = std::string(level->m_levelName),
-            platformer,
-            twoPlayer = level->m_twoPlayerMode
-        ](web::WebTask::Event* e) {
-            if (auto res = e->getValue()) {
-                if (!res->ok()) return;
+        m_fields->m_listener.spawn(
+            web::WebRequest().get(platformer ? fmt::format(pemonlistLevelUrl, levelID) : fmt::format(aredlLevelUrl, levelID)),
+            [this, levelID, levelName = std::string(level->m_levelName), platformer, twoPlayer = level->m_twoPlayerMode](
+                web::WebResponse res
+            ) mutable {
+                if (!res.ok()) return;
 
-                auto json = res->json();
+                auto json = res.json();
                 if (!json.isOk()) return;
 
                 auto position = json.unwrap().get<int>(platformer ? "placement" : "position");
@@ -69,14 +65,12 @@ class $modify(IDLevelCell, LevelCell) {
                 std::vector<int> positions = { position1 };
                 if (platformer || !twoPlayer) return addRank(positions);
 
-                auto url = fmt::format(aredlLevel2pUrl, levelID);
+                m_fields->m_listener.spawn(
+                    web::WebRequest().get(fmt::format(aredlLevel2pUrl, levelID)),
+                    [this, levelID, levelName, positions](web::WebResponse res) mutable {
+                        if (!res.ok()) return addRank(positions);
 
-                auto f = m_fields.self();
-                f->m_listener.bind([this, levelID, levelName, positions](web::WebTask::Event* e) mutable {
-                    if (auto res = e->getValue()) {
-                        if (!res->ok()) return addRank(positions);
-
-                        auto json = res->json();
+                        auto json = res.json();
                         if (!json.isOk()) return addRank(positions);
 
                         auto position = json.unwrap().get<int>("position");
@@ -91,13 +85,9 @@ class $modify(IDLevelCell, LevelCell) {
                         positions.push_back(position2);
                         addRank(positions);
                     }
-                });
-
-                f->m_listener.setFilter(web::WebRequest().get(url));
+                );
             }
-        });
-
-        f->m_listener.setFilter(web::WebRequest().get(platformer ? fmt::format(pemonlistLevelUrl, levelID) : fmt::format(aredlLevelUrl, levelID)));
+        );
     }
 
     void addRank(const std::vector<int>& positions) {

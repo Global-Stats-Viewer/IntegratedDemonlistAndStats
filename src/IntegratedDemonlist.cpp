@@ -9,14 +9,13 @@ std::vector<IDListDemon> IntegratedDemonlist::pemonlist;
 bool IntegratedDemonlist::aredlLoaded = false;
 bool IntegratedDemonlist::pemonlistLoaded = false;
 
-constexpr const char* aredlUrl = "https://api.aredl.net/v2/api/aredl/levels";
-constexpr const char* aredlPacksUrl = "https://api.aredl.net/v2/api/aredl/pack-tiers";
-constexpr const char* pemonlistUrl = "https://pemonlist.com/api/list?limit=150&version=2";
-
-void IntegratedDemonlist::loadAREDL(EventListener<web::WebTask>& listener, std::function<void()> success, std::function<void(int)> failure) {
-    listener.bind([failure = std::move(failure), success = std::move(success)](web::WebTask::Event* e) {
-        if (auto res = e->getValue()) {
-            if (!res->ok()) return failure(res->code());
+void IntegratedDemonlist::loadAREDL(
+    async::TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure
+) {
+    listener.spawn(
+        web::WebRequest().get("https://api.aredl.net/v2/api/aredl/levels"),
+        [failure = std::move(failure), success = std::move(success)](web::WebResponse res) mutable {
+            if (!res.ok()) return failure(res.code());
 
             aredlLoaded = true;
             aredl.clear();
@@ -43,15 +42,16 @@ void IntegratedDemonlist::loadAREDL(EventListener<web::WebTask>& listener, std::
 
             success();
         }
-    });
-
-    listener.setFilter(web::WebRequest().get(aredlUrl));
+    );
 }
 
-void IntegratedDemonlist::loadAREDLPacks(EventListener<web::WebTask>& listener, std::function<void()> success, std::function<void(int)> failure) {
-    listener.bind([failure = std::move(failure), success = std::move(success)](web::WebTask::Event* e) {
-        if (auto res = e->getValue()) {
-            if (!res->ok()) return failure(res->code());
+void IntegratedDemonlist::loadAREDLPacks(
+    async::TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure
+) {
+    listener.spawn(
+        web::WebRequest().get("https://api.aredl.net/v2/api/aredl/pack-tiers"),
+        [failure = std::move(failure), success = std::move(success)](web::WebResponse res) mutable {
+            if (!res.ok()) return failure(res.code());
 
             aredlPacks.clear();
 
@@ -100,15 +100,16 @@ void IntegratedDemonlist::loadAREDLPacks(EventListener<web::WebTask>& listener, 
 
             success();
         }
-    });
-
-    listener.setFilter(web::WebRequest().get(aredlPacksUrl));
+    );
 }
 
-void IntegratedDemonlist::loadPemonlist(EventListener<web::WebTask>& listener, std::function<void()> success, std::function<void(int)> failure) {
-    listener.bind([failure = std::move(failure), success = std::move(success)](web::WebTask::Event* e) {
-        if (auto res = e->getValue()) {
-            if (!res->ok()) return failure(res->code());
+void IntegratedDemonlist::loadPemonlist(
+    async::TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure
+) {
+    listener.spawn(
+        web::WebRequest().get("https://pemonlist.com/api/list?limit=150&version=2"),
+        [failure = std::move(failure), success = std::move(success)](web::WebResponse res) mutable {
+            if (!res.ok()) return failure(res.code());
 
             pemonlistLoaded = true;
             pemonlist.clear();
@@ -132,7 +133,5 @@ void IntegratedDemonlist::loadPemonlist(EventListener<web::WebTask>& listener, s
 
             success();
         }
-    });
-
-    listener.setFilter(web::WebRequest().get(pemonlistUrl));
+    );
 }

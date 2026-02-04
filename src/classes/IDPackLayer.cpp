@@ -7,7 +7,7 @@
 #include <Geode/binding/SetIDPopup.hpp>
 #include <Geode/loader/Mod.hpp>
 #include <Geode/ui/ListView.hpp>
-#include <Geode/utils/ranges.hpp>
+#include <Geode/utils/random.hpp>
 #include <jasmine/random.hpp>
 
 using namespace geode::prelude;
@@ -165,7 +165,7 @@ bool IDPackLayer::init() {
     menu->addChild(m_pageButton);
 
     m_randomButton = CCMenuItemExt::createSpriteExtraWithFilename("BI_randomBtn_001.png"_spr, 0.9f, [this](auto) {
-        page(jasmine::random::getInt(0, (m_fullSearchResults.size() - 1) / 10));
+        page(random::generate(0uz, (m_fullSearchResults.size() - 1) / 10));
     });
     m_randomButton->setPositionY(
         m_pageButton->getPositionY() - m_pageButton->getContentHeight() / 2.0f - m_randomButton->getContentHeight() / 2.0f - 5.0f);
@@ -339,7 +339,7 @@ void IDPackLayer::page(int page) {
     populateList(m_query);
 }
 
-void IDPackLayer::keyDown(enumKeyCodes key) {
+void IDPackLayer::keyDown(enumKeyCodes key, double timestamp) {
     switch (key) {
         case KEY_Left:
         case CONTROLLER_Left:
@@ -353,7 +353,7 @@ void IDPackLayer::keyDown(enumKeyCodes key) {
             search();
             break;
         default:
-            CCLayer::keyDown(key);
+            CCLayer::keyDown(key, timestamp);
             break;
     }
 }
