@@ -6,15 +6,11 @@
 
 using namespace geode::prelude;
 
-constexpr const char* aredlLevelUrl = "https://api.aredl.net/v2/api/aredl/levels/{}";
-constexpr const char* aredlLevel2pUrl = "https://api.aredl.net/v2/api/aredl/levels/{}_2p";
-constexpr const char* pemonlistLevelUrl = "https://pemonlist.com/api/level/{}?version=2";
-
 static std::set<int> loadedDemons;
 
 class $modify(IDLevelCell, LevelCell) {
     struct Fields {
-        async::TaskHolder<web::WebResponse> m_listener;
+        TaskHolder<web::WebResponse> m_listener;
     };
 
     static void onModify(ModifyBase<ModifyDerive<IDLevelCell, LevelCell>>& self) {
@@ -41,7 +37,9 @@ class $modify(IDLevelCell, LevelCell) {
         loadedDemons.insert(levelID);
 
         m_fields->m_listener.spawn(
-            web::WebRequest().get(platformer ? fmt::format(pemonlistLevelUrl, levelID) : fmt::format(aredlLevelUrl, levelID)),
+            web::WebRequest().get(platformer
+                ? fmt::format("https://pemonlist.com/api/level/{}?version=2", levelID)
+                : fmt::format("https://api.aredl.net/v2/api/aredl/levels/{}", levelID)),
             [this, levelID, levelName = std::string(level->m_levelName), platformer, twoPlayer = level->m_twoPlayerMode](
                 web::WebResponse res
             ) mutable {
@@ -66,7 +64,7 @@ class $modify(IDLevelCell, LevelCell) {
                 if (platformer || !twoPlayer) return addRank(positions);
 
                 m_fields->m_listener.spawn(
-                    web::WebRequest().get(fmt::format(aredlLevel2pUrl, levelID)),
+                    web::WebRequest().get(fmt::format("https://api.aredl.net/v2/api/aredl/levels/{}_2p", levelID)),
                     [this, levelID, levelName, positions](web::WebResponse res) mutable {
                         if (!res.ok()) return addRank(positions);
 

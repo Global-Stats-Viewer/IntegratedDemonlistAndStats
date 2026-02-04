@@ -18,21 +18,14 @@ struct IDDemonPack {
     int tier = 0;
 };
 
-class IntegratedDemonlist {
-public:
-    static std::vector<IDListDemon> aredl;
-    static std::vector<IDDemonPack> aredlPacks;
-    static std::vector<IDListDemon> pemonlist;
-    static bool aredlLoaded;
-    static bool pemonlistLoaded;
+namespace IntegratedDemonlist {
+    extern std::vector<IDListDemon> aredl;
+    extern std::vector<IDDemonPack> aredlPacks;
+    extern std::vector<IDListDemon> pemonlist;
+    extern bool aredlLoaded;
+    extern bool pemonlistLoaded;
 
-    static void loadAREDL(
-        geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>
-    );
-    static void loadAREDLPacks(
-        geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>
-    );
-    static void loadPemonlist(
-        geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>
-    );
+    void loadAREDL(geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>);
+    void loadAREDLPacks(geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>);
+    void loadPemonlist(geode::async::TaskHolder<geode::utils::web::WebResponse>&, geode::Function<void()>, geode::CopyableFunction<void(int)>);
 };

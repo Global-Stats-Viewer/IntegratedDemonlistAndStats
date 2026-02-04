@@ -9,9 +9,7 @@ std::vector<IDListDemon> IntegratedDemonlist::pemonlist;
 bool IntegratedDemonlist::aredlLoaded = false;
 bool IntegratedDemonlist::pemonlistLoaded = false;
 
-void IntegratedDemonlist::loadAREDL(
-    async::TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure
-) {
+void IntegratedDemonlist::loadAREDL(TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure) {
     listener.spawn(
         web::WebRequest().get("https://api.aredl.net/v2/api/aredl/levels"),
         [failure = std::move(failure), success = std::move(success)](web::WebResponse res) mutable {
@@ -45,9 +43,7 @@ void IntegratedDemonlist::loadAREDL(
     );
 }
 
-void IntegratedDemonlist::loadAREDLPacks(
-    async::TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure
-) {
+void IntegratedDemonlist::loadAREDLPacks(TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure) {
     listener.spawn(
         web::WebRequest().get("https://api.aredl.net/v2/api/aredl/pack-tiers"),
         [failure = std::move(failure), success = std::move(success)](web::WebResponse res) mutable {
@@ -103,9 +99,7 @@ void IntegratedDemonlist::loadAREDLPacks(
     );
 }
 
-void IntegratedDemonlist::loadPemonlist(
-    async::TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure
-) {
+void IntegratedDemonlist::loadPemonlist(TaskHolder<web::WebResponse>& listener, Function<void()> success, CopyableFunction<void(int)> failure) {
     listener.spawn(
         web::WebRequest().get("https://pemonlist.com/api/list?limit=150&version=2"),
         [failure = std::move(failure), success = std::move(success)](web::WebResponse res) mutable {
