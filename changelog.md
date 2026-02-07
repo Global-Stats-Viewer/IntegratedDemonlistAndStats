@@ -1,5 +1,5 @@
 # Integrated Demonlist Changelog
-## v1.7.13 (2026-02-05)
+## v1.7.13 (2026-02-06)
 - Ported to Geometry Dash v2.208 / Geode SDK v5.0.0
 - Changed the page randomization algorithm from Mersenne Twister to RomuTrio
 
