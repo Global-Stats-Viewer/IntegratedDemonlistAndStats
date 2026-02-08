@@ -6,7 +6,7 @@
 
 using namespace geode::prelude;
 
-static std::set<int> loadedDemons;
+std::set<int> loadedDemons;
 
 class $modify(IDLevelCell, LevelCell) {
     struct Fields {
