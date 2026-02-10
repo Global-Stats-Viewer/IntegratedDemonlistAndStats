@@ -152,7 +152,7 @@ bool IDPackLayer::init() {
     m_pageButton->setID("page-button");
     menu->addChild(m_pageButton);
 
-    auto randomSprite = CCSprite::createWithSpriteFrameName("BI_randomBtn_001.png");
+    auto randomSprite = CCSprite::create("BI_randomBtn_001.png"_spr);
     randomSprite->setScale(0.9f);
     m_randomButton = CCMenuItemSpriteExtra::create(randomSprite, this, menu_selector(IDPackLayer::onRandom));
     m_randomButton->setPositionY(
