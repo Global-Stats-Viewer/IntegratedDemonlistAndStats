@@ -31,11 +31,11 @@ CCScene* IDListLayer::scene() {
 }
 
 bool pemonlistEnabled = false;
-constexpr const char* aredlInfo =
+constexpr std::string_view aredlInfo =
     "The <cg>All Rated Extreme Demons List</c> (<cg>AREDL</c>) is an <cp>unofficial ranking</c> "
     "of all rated <cj>classic mode</c> <cr>extreme demons</c> in Geometry Dash.\n"
     "It is managed by <cy>C6Carbon</c> and <cy>Padahk</c>.";
-constexpr const char* pemonlistInfo =
+constexpr std::string_view pemonlistInfo =
     "The <cg>Pemonlist</c> is an <cp>unofficial ranking</c> of the top 150 <cj>platformer mode</c> <cr>demons</c> in Geometry Dash.\n"
     "It is managed by <cy>camila314</c>, <cy>Extatica</c>, <cy>IvanCrafter026</c>, <cy>Megu</c>, <cy>Voiddle</c>, "
     "<cy>FakeHATETAG</c>, and <cy>Enzo1141</c>.";
@@ -90,20 +90,22 @@ bool IDListLayer::init() {
     searchBackground->setID("search-bar-background");
     m_searchBarMenu->addChild(searchBackground);
 
-    m_searchButton = CCMenuItemExt::createSpriteExtraWithFrameName("gj_findBtn_001.png", 0.7f, [this](auto) {
-        search();
-    });
+    auto searchSprite = CCSprite::createWithSpriteFrameName("gj_findBtn_001.png");
+    searchSprite->setScale(0.7f);
+    m_searchButton = CCMenuItemSpriteExtra::create(searchSprite, this, menu_selector(IDListLayer::onSearch));
     m_searchButton->setPosition({ 337.0f, 15.0f });
     m_searchButton->setID("search-button");
     m_searchBarMenu->addChild(m_searchButton);
 
-    m_searchBar = TextInput::create(413.3f, "Search Demons...");
+    m_searchBar = TextInput::create(310.0f, "Search Demons...");
     m_searchBar->setPosition({ 165.0f, 15.0f });
     m_searchBar->setTextAlign(TextInputAlign::Left);
     auto inputNode = m_searchBar->getInputNode();
-    inputNode->setLabelPlaceholderScale(0.53f);
-    inputNode->setMaxLabelScale(0.53f);
-    m_searchBar->setScale(0.75f);
+    inputNode->setLabelPlaceholderScale(0.4f);
+    inputNode->setMaxLabelScale(0.4f);
+    auto bgSprite = m_searchBar->getBGSprite();
+    bgSprite->setContentSize({ 620.0f, 40.0f });
+    bgSprite->setScale(0.5f);
     m_searchBar->setID("search-bar");
     m_searchBarMenu->addChild(m_searchBar);
 
@@ -112,31 +114,28 @@ bool IDListLayer::init() {
     menu->setID("button-menu");
     addChild(menu);
 
-    m_backButton = CCMenuItemExt::createSpriteExtraWithFrameName("GJ_arrow_01_001.png", 1.0f, [this](auto) {
-        CCDirector::get()->popSceneWithTransition(0.5f, kPopTransitionFade);
-    });
-    m_backButton->setPosition({ 25.0f, winSize.height - 25.0f });
-    m_backButton->setID("back-button");
-    menu->addChild(m_backButton);
+    auto backButton = CCMenuItemSpriteExtra::create(
+        CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"), this, menu_selector(IDListLayer::onBack)
+    );
+    backButton->setPosition({ 25.0f, winSize.height - 25.0f });
+    backButton->setID("back-button");
+    menu->addChild(backButton);
 
-    m_leftButton = CCMenuItemExt::createSpriteExtraWithFrameName("GJ_arrow_03_001.png", 1.0f, [this](auto) {
-        page(m_page - 1);
-    });
+    auto leftBtnSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png");
+    m_leftButton = CCMenuItemSpriteExtra::create(leftBtnSpr, this, menu_selector(IDListLayer::onPrevPage));
     m_leftButton->setPosition({ 24.0f, winSize.height / 2.0f });
     m_leftButton->setID("prev-page-button");
     menu->addChild(m_leftButton);
 
     auto rightBtnSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png");
     rightBtnSpr->setFlipX(true);
-    m_rightButton = CCMenuItemExt::createSpriteExtra(rightBtnSpr, [this](auto) {
-        page(m_page + 1);
-    });
+    m_rightButton = CCMenuItemSpriteExtra::create(rightBtnSpr, this, menu_selector(IDListLayer::onNextPage));
     m_rightButton->setPosition({ winSize.width - 24.0f, winSize.height / 2.0f });
     m_rightButton->setID("next-page-button");
     menu->addChild(m_rightButton);
 
     m_infoButton = InfoAlertButton::create(pemonlistEnabled ? "Pemonlist" : "All Rated Extreme Demons List",
-        pemonlistEnabled ? pemonlistInfo : aredlInfo, 1.0f);
+        pemonlistEnabled ? gd::string(pemonlistInfo.data(), pemonlistInfo.size()) : gd::string(aredlInfo.data(), aredlInfo.size()), 1.0f);
     m_infoButton->setPosition({ 30.0f, 30.0f });
     m_infoButton->setID("info-button");
     menu->addChild(m_infoButton, 2);
@@ -152,72 +151,22 @@ bool IDListLayer::init() {
     };
 
     auto refreshBtnSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
-    auto refreshButton = CCMenuItemExt::createSpriteExtra(refreshBtnSpr, [this](auto) {
-        showLoading();
-        if (pemonlistEnabled) {
-            IntegratedDemonlist::loadPemonlist(m_pemonlistListener, [this] {
-                populateList(m_query);
-            }, m_pemonlistFailure);
-        }
-        else {
-            IntegratedDemonlist::loadAREDL(m_aredlListener, [this] {
-                populateList(m_query);
-            }, m_aredlFailure);
-        }
-    });
+    auto refreshButton = CCMenuItemSpriteExtra::create(refreshBtnSpr, this, menu_selector(IDListLayer::onRefresh));
     refreshButton->setPosition({ winSize.width - refreshBtnSpr->getContentWidth() / 2.0f - 4.0f, refreshBtnSpr->getContentHeight() / 2.0f + 4.0f });
     refreshButton->setID("refresh-button");
     menu->addChild(refreshButton, 2);
 
-    m_starToggle = CCMenuItemExt::createSpriteExtraWithFrameName("GJ_starsIcon_001.png", 1.1f, [this](auto) {
-        if (!pemonlistEnabled) return;
-        pemonlistEnabled = false;
-        m_starToggle->setColor({ 255, 255, 255 });
-        m_moonToggle->setColor({ 125, 125, 125 });
-        showLoading();
-        if (auto listTitle = static_cast<CCLabelBMFont*>(m_list->getChildByID("title"))) {
-            listTitle->setString("All Rated Extreme Demons List");
-            listTitle->limitLabelWidth(280.0f, 0.8f, 0.0f);
-        }
-        m_infoButton->m_title = "All Rated Extreme Demons List";
-        m_infoButton->m_description = aredlInfo;
-        m_fullSearchResults.clear();
-        if (IntegratedDemonlist::aredlLoaded) {
-            page(0);
-        }
-        else {
-            IntegratedDemonlist::loadAREDL(m_aredlListener, [this] {
-                page(0);
-            }, m_aredlFailure);
-        }
-    });
+    auto starSprite = CCSprite::createWithSpriteFrameName("GJ_starsIcon_001.png");
+    starSprite->setScale(1.1f);
+    m_starToggle = CCMenuItemSpriteExtra::create(starSprite, this, menu_selector(IDListLayer::onStar));
     m_starToggle->setPosition({ 30.0f, 60.0f });
     m_starToggle->setColor(pemonlistEnabled ? ccColor3B { 125, 125, 125 } : ccColor3B { 255, 255, 255 });
     m_starToggle->setID("aredl-button");
     menu->addChild(m_starToggle, 2);
 
-    m_moonToggle = CCMenuItemExt::createSpriteExtraWithFrameName("GJ_moonsIcon_001.png", 1.1f, [this](auto) {
-        if (pemonlistEnabled) return;
-        pemonlistEnabled = true;
-        m_starToggle->setColor({ 125, 125, 125 });
-        m_moonToggle->setColor({ 255, 255, 255 });
-        showLoading();
-        if (auto listTitle = static_cast<CCLabelBMFont*>(m_list->getChildByID("title"))) {
-            listTitle->setString("Pemonlist");
-            listTitle->limitLabelWidth(280.0f, 0.8f, 0.0f);
-        }
-        m_infoButton->m_title = "Pemonlist";
-        m_infoButton->m_description = pemonlistInfo;
-        m_fullSearchResults.clear();
-        if (IntegratedDemonlist::pemonlistLoaded) {
-            page(0);
-        }
-        else {
-            IntegratedDemonlist::loadPemonlist(m_pemonlistListener, [this] {
-                page(0);
-            }, m_pemonlistFailure);
-        }
-    });
+    auto moonSprite = CCSprite::createWithSpriteFrameName("GJ_moonsIcon_001.png");
+    moonSprite->setScale(1.1f);
+    m_moonToggle = CCMenuItemSpriteExtra::create(moonSprite, this, menu_selector(IDListLayer::onMoon));
     m_moonToggle->setPosition({ 60.0f, 60.0f });
     m_moonToggle->setColor(pemonlistEnabled ? ccColor3B { 255, 255, 255 } : ccColor3B { 125, 125, 125 });
     m_moonToggle->setID("pemonlist-button");
@@ -229,18 +178,14 @@ bool IDListLayer::init() {
     m_pageLabel->setScale(0.8f);
     m_pageLabel->setPosition(pageBtnSpr->getContentSize() / 2.0f);
     pageBtnSpr->addChild(m_pageLabel);
-    m_pageButton = CCMenuItemExt::createSpriteExtra(pageBtnSpr, [this](auto) {
-        auto popup = SetIDPopup::create(m_page + 1, 1, (m_fullSearchResults.size() + 9) / 10, "Go to Page", "Go", true, 1, 60.0f, false, false);
-        popup->m_delegate = this;
-        popup->show();
-    });
+    m_pageButton = CCMenuItemSpriteExtra::create(pageBtnSpr, this, menu_selector(IDListLayer::onPage));
     m_pageButton->setPositionY(winSize.height - 39.5f);
     m_pageButton->setID("page-button");
     menu->addChild(m_pageButton);
 
-    m_randomButton = CCMenuItemExt::createSpriteExtraWithFilename("BI_randomBtn_001.png"_spr, 0.9f, [this](auto) {
-        page(random::generate(0uz, (m_fullSearchResults.size() - 1) / 10));
-    });
+    auto randomSprite = CCSprite::createWithSpriteFrameName("BI_randomBtn_001.png");
+    randomSprite->setScale(0.9f);
+    m_randomButton = CCMenuItemSpriteExtra::create(randomSprite, this, menu_selector(IDListLayer::onRandom));
     m_randomButton->setPositionY(
         m_pageButton->getPositionY() - m_pageButton->getContentHeight() / 2.0f - m_randomButton->getContentHeight() / 2.0f - 5.0f);
     m_randomButton->setID("random-button");
@@ -253,9 +198,7 @@ bool IDListLayer::init() {
     otherLastArrow->setFlipX(true);
     lastArrow->addChild(otherLastArrow);
     lastArrow->setScale(0.4f);
-    m_lastButton = CCMenuItemExt::createSpriteExtra(lastArrow, [this](auto) {
-        page((m_fullSearchResults.size() - 1) / 10);
-    });
+    m_lastButton = CCMenuItemSpriteExtra::create(lastArrow, this, menu_selector(IDListLayer::onLast));
     m_lastButton->setPositionY(
         m_randomButton->getPositionY() - m_randomButton->getContentHeight() / 2.0f - m_lastButton->getContentHeight() / 2.0f - 5.0f);
     m_lastButton->setID("last-button");
@@ -271,9 +214,7 @@ bool IDListLayer::init() {
     otherFirstArrow->setPosition(firstArrow->getContentSize() / 2.0f - CCPoint { 20.0f, 0.0f });
     firstArrow->addChild(otherFirstArrow);
     firstArrow->setScale(0.4f);
-    m_firstButton = CCMenuItemExt::createSpriteExtra(firstArrow, [this](auto) {
-        page(0);
-    });
+    m_firstButton = CCMenuItemSpriteExtra::create(firstArrow, this, menu_selector(IDListLayer::onFirst));
     m_firstButton->setPosition({ 21.5f, m_lastButton->getPositionY() });
     m_firstButton->setID("first-button");
     menu->addChild(m_firstButton);
@@ -305,6 +246,96 @@ bool IDListLayer::init() {
     }
 
     return true;
+}
+
+void IDListLayer::onBack(CCObject* sender) {
+    CCDirector::get()->popSceneWithTransition(0.5f, kPopTransitionFade);
+}
+
+void IDListLayer::onPrevPage(CCObject* sender) {
+    page(m_page - 1);
+}
+
+void IDListLayer::onNextPage(CCObject* sender) {
+    page(m_page + 1);
+}
+
+void IDListLayer::onRefresh(CCObject* sender) {
+    showLoading();
+    if (pemonlistEnabled) {
+        IntegratedDemonlist::loadPemonlist(m_pemonlistListener, [this] {
+            populateList(m_query);
+        }, m_pemonlistFailure);
+    }
+    else {
+        IntegratedDemonlist::loadAREDL(m_aredlListener, [this] {
+            populateList(m_query);
+        }, m_aredlFailure);
+    }
+}
+
+void IDListLayer::onStar(CCObject* sender) {
+    if (!pemonlistEnabled) return;
+    pemonlistEnabled = false;
+    m_starToggle->setColor({ 255, 255, 255 });
+    m_moonToggle->setColor({ 125, 125, 125 });
+    showLoading();
+    if (auto listTitle = static_cast<CCLabelBMFont*>(m_list->getChildByID("title"))) {
+        listTitle->setString("All Rated Extreme Demons List");
+        listTitle->limitLabelWidth(280.0f, 0.8f, 0.0f);
+    }
+    m_infoButton->m_title = "All Rated Extreme Demons List";
+    m_infoButton->m_description = gd::string(aredlInfo.data(), aredlInfo.size());
+    m_fullSearchResults.clear();
+    if (IntegratedDemonlist::aredlLoaded) {
+        page(0);
+    }
+    else {
+        IntegratedDemonlist::loadAREDL(m_aredlListener, [this] {
+            page(0);
+        }, m_aredlFailure);
+    }
+}
+
+void IDListLayer::onMoon(CCObject* sender) {
+    if (pemonlistEnabled) return;
+    pemonlistEnabled = true;
+    m_starToggle->setColor({ 125, 125, 125 });
+    m_moonToggle->setColor({ 255, 255, 255 });
+    showLoading();
+    if (auto listTitle = static_cast<CCLabelBMFont*>(m_list->getChildByID("title"))) {
+        listTitle->setString("Pemonlist");
+        listTitle->limitLabelWidth(280.0f, 0.8f, 0.0f);
+    }
+    m_infoButton->m_title = "Pemonlist";
+    m_infoButton->m_description = gd::string(pemonlistInfo.data(), pemonlistInfo.size());
+    m_fullSearchResults.clear();
+    if (IntegratedDemonlist::pemonlistLoaded) {
+        page(0);
+    }
+    else {
+        IntegratedDemonlist::loadPemonlist(m_pemonlistListener, [this] {
+            page(0);
+        }, m_pemonlistFailure);
+    }
+}
+
+void IDListLayer::onPage(CCObject* sender) {
+    auto popup = SetIDPopup::create(m_page + 1, 1, (m_fullSearchResults.size() + 9) / 10, "Go to Page", "Go", true, 1, 60.0f, false, false);
+    popup->m_delegate = this;
+    popup->show();
+}
+
+void IDListLayer::onRandom(CCObject* sender) {
+    page(random::generate(0uz, (m_fullSearchResults.size() - 1) / 10));
+}
+
+void IDListLayer::onFirst(CCObject* sender) {
+    page(0);
+}
+
+void IDListLayer::onLast(CCObject* sender) {
+    page((m_fullSearchResults.size() - 1) / 10);
 }
 
 void IDListLayer::showLoading() {
@@ -402,7 +433,7 @@ void IDListLayer::setupPageInfo(gd::string, const char*) {
     m_countLabel->limitLabelWidth(100.0f, 0.6f, 0.0f);
 }
 
-void IDListLayer::search() {
+void IDListLayer::onSearch(CCObject* sender) {
     auto query = m_searchBar->getString();
     if (m_query != query) {
         showLoading();
@@ -439,7 +470,7 @@ void IDListLayer::keyDown(enumKeyCodes key, double timestamp) {
             if (m_rightButton->isVisible()) page(m_page + 1);
             break;
         case KEY_Enter:
-            search();
+            onSearch(nullptr);
             break;
         default:
             CCLayer::keyDown(key, timestamp);
@@ -448,7 +479,7 @@ void IDListLayer::keyDown(enumKeyCodes key, double timestamp) {
 }
 
 void IDListLayer::keyBackClicked() {
-    CCDirector::get()->popSceneWithTransition(0.5f, kPopTransitionFade);
+    onBack(nullptr);
 }
 
 void IDListLayer::setIDPopupClosed(SetIDPopup*, int page) {

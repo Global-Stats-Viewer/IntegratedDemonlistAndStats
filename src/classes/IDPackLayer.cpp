@@ -12,7 +12,7 @@
 
 using namespace geode::prelude;
 
-constexpr const char* aredlPackInfo =
+constexpr std::string_view aredlPackInfo =
     "The <cg>All Rated Extreme Demons List</c> (<cg>AREDL</c>) has <cp>packs</c> of <cr>extreme demons</c> that are <cj>related</c> in some way.\n"
     "If all levels in a pack are <cl>completed</c>, the pack can earn <cy>points</c> on <cg>aredl.net</c>.";
 
@@ -83,9 +83,9 @@ bool IDPackLayer::init() {
     searchBackground->setID("search-bar-background");
     m_searchBarMenu->addChild(searchBackground);
 
-    m_searchButton = CCMenuItemExt::createSpriteExtraWithFrameName("gj_findBtn_001.png", 0.7f, [this](auto) {
-        search();
-    });
+    auto searchSprite = CCSprite::createWithSpriteFrameName("gj_findBtn_001.png");
+    searchSprite->setScale(0.7f);
+    m_searchButton = CCMenuItemSpriteExtra::create(searchSprite, this, menu_selector(IDPackLayer::onSearch));
     m_searchButton->setPosition({ 337.0f, 15.0f });
     m_searchButton->setID("search-button");
     m_searchBarMenu->addChild(m_searchButton);
@@ -105,30 +105,27 @@ bool IDPackLayer::init() {
     menu->setID("button-menu");
     addChild(menu);
 
-    m_backButton = CCMenuItemExt::createSpriteExtraWithFrameName("GJ_arrow_01_001.png", 1.0f, [this](auto) {
-        CCDirector::get()->popSceneWithTransition(0.5f, kPopTransitionFade);
-    });
-    m_backButton->setPosition({ 25.0f, winSize.height - 25.0f });
-    m_backButton->setID("back-button");
-    menu->addChild(m_backButton);
+    auto backButton = CCMenuItemSpriteExtra::create(
+        CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"), this, menu_selector(IDPackLayer::onBack)
+    );
+    backButton->setPosition({ 25.0f, winSize.height - 25.0f });
+    backButton->setID("back-button");
+    menu->addChild(backButton);
 
-    m_leftButton = CCMenuItemExt::createSpriteExtraWithFrameName("GJ_arrow_03_001.png", 1.0f, [this](auto) {
-        page(m_page - 1);
-    });
+    auto leftBtnSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png");
+    m_leftButton = CCMenuItemSpriteExtra::create(leftBtnSpr, this, menu_selector(IDPackLayer::onPrevPage));
     m_leftButton->setPosition({ 24.0f, winSize.height / 2.0f });
     m_leftButton->setID("prev-page-button");
     menu->addChild(m_leftButton);
 
     auto rightBtnSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png");
     rightBtnSpr->setFlipX(true);
-    m_rightButton = CCMenuItemExt::createSpriteExtra(rightBtnSpr, [this](auto) {
-        page(m_page + 1);
-    });
+    m_rightButton = CCMenuItemSpriteExtra::create(rightBtnSpr, this, menu_selector(IDPackLayer::onNextPage));
     m_rightButton->setPosition({ winSize.width - 24.0f, winSize.height / 2.0f });
     m_rightButton->setID("next-page-button");
     menu->addChild(m_rightButton);
 
-    auto infoButton = InfoAlertButton::create("AREDL Packs", aredlPackInfo, 1.0f);
+    auto infoButton = InfoAlertButton::create("AREDL Packs", gd::string(aredlPackInfo.data(), aredlPackInfo.size()), 1.0f);
     infoButton->setPosition({ 30.0f, 30.0f });
     infoButton->setID("info-button");
     menu->addChild(infoButton, 2);
@@ -139,12 +136,7 @@ bool IDPackLayer::init() {
     };
 
     auto refreshBtnSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
-    auto refreshButton = CCMenuItemExt::createSpriteExtra(refreshBtnSpr, [this](auto) {
-        showLoading();
-        IntegratedDemonlist::loadAREDLPacks(m_aredlListener, [this] {
-            populateList(m_query);
-        }, m_aredlFailure);
-    });
+    auto refreshButton = CCMenuItemSpriteExtra::create(refreshBtnSpr, this, menu_selector(IDPackLayer::onSearch));
     refreshButton->setPosition(winSize.width - refreshBtnSpr->getContentWidth() / 2.0f - 4.0f, refreshBtnSpr->getContentHeight() / 2.0f + 4.0f);
     refreshButton->setID("refresh-button");
     menu->addChild(refreshButton, 2);
@@ -155,18 +147,14 @@ bool IDPackLayer::init() {
     m_pageLabel->setScale(0.8f);
     m_pageLabel->setPosition(pageBtnSpr->getContentSize() / 2.0f);
     pageBtnSpr->addChild(m_pageLabel);
-    m_pageButton = CCMenuItemExt::createSpriteExtra(pageBtnSpr, [this](auto) {
-        auto popup = SetIDPopup::create(m_page + 1, 1, (m_fullSearchResults.size() + 9) / 10, "Go to Page", "Go", true, 1, 60.0f, false, false);
-        popup->m_delegate = this;
-        popup->show();
-    });
+    m_pageButton = CCMenuItemSpriteExtra::create(pageBtnSpr, this, menu_selector(IDPackLayer::onPage));
     m_pageButton->setPositionY(winSize.height - 39.5f);
     m_pageButton->setID("page-button");
     menu->addChild(m_pageButton);
 
-    m_randomButton = CCMenuItemExt::createSpriteExtraWithFilename("BI_randomBtn_001.png"_spr, 0.9f, [this](auto) {
-        page(random::generate(0uz, (m_fullSearchResults.size() - 1) / 10));
-    });
+    auto randomSprite = CCSprite::createWithSpriteFrameName("BI_randomBtn_001.png");
+    randomSprite->setScale(0.9f);
+    m_randomButton = CCMenuItemSpriteExtra::create(randomSprite, this, menu_selector(IDPackLayer::onRandom));
     m_randomButton->setPositionY(
         m_pageButton->getPositionY() - m_pageButton->getContentHeight() / 2.0f - m_randomButton->getContentHeight() / 2.0f - 5.0f);
     m_randomButton->setID("random-button");
@@ -179,9 +167,7 @@ bool IDPackLayer::init() {
     otherLastArrow->setFlipX(true);
     lastArrow->addChild(otherLastArrow);
     lastArrow->setScale(0.4f);
-    m_lastButton = CCMenuItemExt::createSpriteExtra(lastArrow, [this](auto) {
-        page((m_fullSearchResults.size() - 1) / 10);
-    });
+    m_lastButton = CCMenuItemSpriteExtra::create(lastArrow, this, menu_selector(IDPackLayer::onLast));
     m_lastButton->setPositionY(
         m_randomButton->getPositionY() - m_randomButton->getContentHeight() / 2.0f - m_lastButton->getContentHeight() / 2.0f - 5.0f);
     m_lastButton->setID("last-button");
@@ -197,9 +183,7 @@ bool IDPackLayer::init() {
     otherFirstArrow->setPosition(firstArrow->getContentSize() / 2.0f - CCPoint { 20.0f, 0.0f });
     firstArrow->addChild(otherFirstArrow);
     firstArrow->setScale(0.4f);
-    m_firstButton = CCMenuItemExt::createSpriteExtra(firstArrow, [this](auto) {
-        page(0);
-    });
+    m_firstButton = CCMenuItemSpriteExtra::create(firstArrow, this, menu_selector(IDPackLayer::onFirst));
     m_firstButton->setPosition({ 21.5f, m_lastButton->getPositionY() });
     m_firstButton->setID("first-button");
     menu->addChild(m_firstButton);
@@ -223,23 +207,21 @@ bool IDPackLayer::init() {
             shader->link();
             shader->updateUniforms();
             shaderCache->addProgram(shader, "pack-gradient"_spr);
-            shader->release();
         }
         else {
-            int length, written;
+            int length;
             glGetShaderiv(shader->m_uFragShader, GL_INFO_LOG_LENGTH, &length);
             if (length > 0) {
-                auto log = new char[length];
-                glGetShaderInfoLog(shader->m_uFragShader, length, &written, log);
+                std::string log(length, '\0');
+                int written;
+                glGetShaderInfoLog(shader->m_uFragShader, length, &written, log.data());
                 log::error("Failed to compile pack gradient shader:\n{}", log);
-                delete[] log;
             }
             else {
                 log::error("Failed to compile pack gradient shader");
             }
-            shader->release();
-            shader = nullptr;
         }
+        shader->release();
     }
 
     if (!IntegratedDemonlist::aredlPacks.empty()) {
@@ -252,6 +234,43 @@ bool IDPackLayer::init() {
     }
 
     return true;
+}
+
+void IDPackLayer::onBack(CCObject* sender) {
+    CCDirector::get()->popSceneWithTransition(0.5f, kPopTransitionFade);
+}
+
+void IDPackLayer::onPrevPage(CCObject* sender) {
+    page(m_page - 1);
+}
+
+void IDPackLayer::onNextPage(CCObject* sender) {
+    page(m_page + 1);
+}
+
+void IDPackLayer::onRefresh(CCObject* sender) {
+    showLoading();
+    IntegratedDemonlist::loadAREDLPacks(m_aredlListener, [this] {
+        populateList(m_query);
+    }, m_aredlFailure);
+}
+
+void IDPackLayer::onPage(CCObject* sender) {
+    auto popup = SetIDPopup::create(m_page + 1, 1, (m_fullSearchResults.size() + 9) / 10, "Go to Page", "Go", true, 1, 60.0f, false, false);
+    popup->m_delegate = this;
+    popup->show();
+}
+
+void IDPackLayer::onRandom(CCObject* sender) {
+    page(random::generate(0uz, (m_fullSearchResults.size() - 1) / 10));
+}
+
+void IDPackLayer::onFirst(CCObject* sender) {
+    page(0);
+}
+
+void IDPackLayer::onLast(CCObject* sender) {
+    page((m_fullSearchResults.size() - 1) / 10);
 }
 
 void IDPackLayer::showLoading() {
@@ -321,7 +340,7 @@ void IDPackLayer::populateList(const std::string& query) {
     }
 }
 
-void IDPackLayer::search() {
+void IDPackLayer::onSearch(CCObject* sender) {
     auto query = m_searchBar->getString();
     if (m_query != query) {
         showLoading();
@@ -350,7 +369,7 @@ void IDPackLayer::keyDown(enumKeyCodes key, double timestamp) {
             if (m_rightButton->isVisible()) page(m_page + 1);
             break;
         case KEY_Enter:
-            search();
+            onSearch(nullptr);
             break;
         default:
             CCLayer::keyDown(key, timestamp);
@@ -359,7 +378,7 @@ void IDPackLayer::keyDown(enumKeyCodes key, double timestamp) {
 }
 
 void IDPackLayer::keyBackClicked() {
-    CCDirector::get()->popSceneWithTransition(0.5f, kPopTransitionFade);
+    onBack(nullptr);
 }
 
 void IDPackLayer::setIDPopupClosed(SetIDPopup*, int page) {

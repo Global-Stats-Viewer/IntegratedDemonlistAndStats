@@ -3,11 +3,12 @@
 #include <Geode/binding/GameStatsManager.hpp>
 #include <Geode/binding/LevelBrowserLayer.hpp>
 #include <Geode/loader/Mod.hpp>
+#include <Geode/utils/StringMap.hpp>
 #include <jasmine/search.hpp>
 
 using namespace geode::prelude;
 
-std::unordered_map<std::string, std::vector<ccColor3B>> tierColors = {
+StringMap<std::vector<ccColor3B>> tierColors = {
     { "Iron Tier", { { 186, 169, 175 }, { 246, 246, 246 } } },
     { "Gold Tier", { { 255, 155, 92 }, { 255, 239, 128 } } },
     { "Ruby Tier", { { 219, 46, 79 }, { 248, 132, 103 } } },
@@ -16,7 +17,7 @@ std::unordered_map<std::string, std::vector<ccColor3B>> tierColors = {
     { "Diamond Tier", { { 136, 181, 255 }, { 237, 254, 255 }, { 255, 255, 255 }, { 226, 246, 255 } } }
 };
 
-IDPackCell* IDPackCell::create(const std::string& name, double points, const std::vector<int>& levels, const std::string& tier) {
+IDPackCell* IDPackCell::create(std::string_view name, double points, std::span<const int> levels, std::string_view tier) {
     auto ret = new IDPackCell();
     if (ret->init(name, points, levels, tier)) {
         ret->autorelease();
@@ -26,10 +27,12 @@ IDPackCell* IDPackCell::create(const std::string& name, double points, const std
     return nullptr;
 }
 
-bool IDPackCell::init(const std::string& name, double points, const std::vector<int>& levels, const std::string& tier) {
+bool IDPackCell::init(std::string_view name, double points, std::span<const int> levels, std::string_view tier) {
     if (!CCLayer::init()) return false;
 
     setID("IDPackCell");
+
+    m_levels = levels;
 
     auto difficultySprite = CCSprite::createWithSpriteFrameName("difficulty_10_btn_001.png");
     difficultySprite->setPosition({ 31.0f, 50.0f });
@@ -46,13 +49,13 @@ bool IDPackCell::init(const std::string& name, double points, const std::vector<
         addChild(m_background);
     }
 
-    auto nameLabel = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
+    auto nameLabel = CCLabelBMFont::create(name.data(), "bigFont.fnt");
     nameLabel->setPosition({ 162.0f, 85.0f });
     nameLabel->limitLabelWidth(205.0f, 0.9f, 0.0f);
     nameLabel->setID("name-label");
     addChild(nameLabel);
 
-    auto tierLabel = CCLabelBMFont::create(tier.c_str(), "bigFont.fnt");
+    auto tierLabel = CCLabelBMFont::create(tier.data(), "bigFont.fnt");
     tierLabel->setPosition({ 162.0f, 65.0f });
     tierLabel->setScale(0.4f);
     tierLabel->setID("tier-label");
@@ -60,10 +63,7 @@ bool IDPackCell::init(const std::string& name, double points, const std::vector<
 
     auto viewSprite = ButtonSprite::create("View", 50, 0, 0.6f, false, "bigFont.fnt", "GJ_button_01.png", 50.0f);
     auto viewMenu = CCMenu::create();
-    auto viewButton = CCMenuItemExt::createSpriteExtra(viewSprite, [this, levels](auto) {
-        CCDirector::get()->pushScene(CCTransitionFade::create(0.5f,
-            LevelBrowserLayer::scene(jasmine::search::getObject(levels, &fmt::to_string<int>))));
-    });
+    auto viewButton = CCMenuItemSpriteExtra::create(viewSprite, this, menu_selector(IDPackCell::onClick));
     viewButton->setID("view-button");
     viewMenu->addChild(viewButton);
     viewMenu->setPosition({ 347.0f - viewSprite->getContentWidth() / 2.0f, 50.0f });
@@ -127,6 +127,11 @@ bool IDPackCell::init(const std::string& name, double points, const std::vector<
     }
 
     return true;
+}
+
+void IDPackCell::onClick(CCObject* sender) {
+    CCDirector::get()->pushScene(CCTransitionFade::create(0.5f,
+        LevelBrowserLayer::scene(jasmine::search::getObject(m_levels, &fmt::to_string<int>))));
 }
 
 void IDPackCell::draw() {

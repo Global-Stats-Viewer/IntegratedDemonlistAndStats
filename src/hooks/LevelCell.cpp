@@ -1,6 +1,7 @@
 #include "../IntegratedDemonlist.hpp"
 #include <Geode/binding/GJGameLevel.hpp>
 #include <Geode/modify/LevelCell.hpp>
+#include <Geode/utils/StringBuffer.hpp>
 #include <jasmine/hook.hpp>
 #include <jasmine/setting.hpp>
 
@@ -94,15 +95,15 @@ class $modify(IDLevelCell, LevelCell) {
         auto dailyLevel = m_level->m_dailyID.value() > 0;
         auto isWhite = dailyLevel || jasmine::setting::getValue<bool>("white-rank");
 
-        fmt::memory_buffer positionsStr;
+        StringBuffer positionsStr;
         for (auto it = positions.begin(); it != positions.end(); ++it) {
-            if (it != positions.begin()) positionsStr.push_back('/');
-            fmt::format_to(std::back_inserter(positionsStr), "#{}", *it);
+            if (it != positions.begin()) positionsStr.append('/');
+            positionsStr.append("#{}", *it);
         }
-        if (m_level->isPlatformer()) fmt::format_to(std::back_inserter(positionsStr), " Pemonlist");
-        else fmt::format_to(std::back_inserter(positionsStr), " AREDL");
+        if (m_level->isPlatformer()) positionsStr.append(" Pemonlist");
+        else positionsStr.append(" AREDL");
 
-        auto rankTextNode = CCLabelBMFont::create(fmt::to_string(positionsStr).c_str(), "chatFont.fnt");
+        auto rankTextNode = CCLabelBMFont::create(positionsStr.c_str(), "chatFont.fnt");
         rankTextNode->setPosition({ 346.0f, dailyLevel ? 6.0f : 1.0f });
         rankTextNode->setAnchorPoint({ 1.0f, 0.0f });
         rankTextNode->setScale(m_compactView ? 0.45f : 0.6f);

@@ -8,7 +8,6 @@ public:
     static IDListLayer* create();
     static cocos2d::CCScene* scene();
 
-    void search();
     void page(int);
     void keyDown(cocos2d::enumKeyCodes, double) override;
     void keyBackClicked() override;
@@ -25,7 +24,6 @@ protected:
     cocos2d::CCLabelBMFont* m_countLabel;
     cocos2d::CCLabelBMFont* m_pageLabel;
     InfoAlertButton* m_infoButton;
-    CCMenuItemSpriteExtra* m_backButton;
     CCMenuItemSpriteExtra* m_leftButton;
     CCMenuItemSpriteExtra* m_rightButton;
     CCMenuItemSpriteExtra* m_pageButton;
@@ -42,6 +40,17 @@ protected:
     geode::CopyableFunction<void(int)> m_pemonlistFailure;
 
     bool init() override;
+    void onSearch(cocos2d::CCObject*);
+    void onBack(cocos2d::CCObject*);
+    void onPrevPage(cocos2d::CCObject*);
+    void onNextPage(cocos2d::CCObject*);
+    void onRefresh(cocos2d::CCObject*);
+    void onStar(cocos2d::CCObject*);
+    void onMoon(cocos2d::CCObject*);
+    void onPage(cocos2d::CCObject*);
+    void onRandom(cocos2d::CCObject*);
+    void onFirst(cocos2d::CCObject*);
+    void onLast(cocos2d::CCObject*);
     void showLoading();
     void populateList(const std::string& query);
     void loadLevelsFinished(cocos2d::CCArray* levels, const char* key, int) override;
