@@ -18,7 +18,23 @@
         ],
         "sprites": [
             "resources/*.png"
-        ]
+        ],
+        "spritesheets": {
+            "GSV_Flags": [
+                "resources/gsv/flags/*.png",
+                "resources/gsv/flags/countries/*.png",
+                "resources/gsv/flags/regions/*.png",
+                "resources/gsv/flags/subdivisions/au/*.png",
+                "resources/gsv/flags/subdivisions/cn/*.png",
+                "resources/gsv/flags/subdivisions/dk/*.png",
+                "resources/gsv/flags/subdivisions/fi/*.png",
+                "resources/gsv/flags/subdivisions/fr/*.png",
+                "resources/gsv/flags/subdivisions/gb/*.png",
+                "resources/gsv/flags/subdivisions/nl/*.png",
+                "resources/gsv/flags/subdivisions/no/*.png",
+                "resources/gsv/flags/subdivisions/us/*.png"
+            ]
+        }
     },
     "settings": {
         "enable-rank": {
