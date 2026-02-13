@@ -6,11 +6,11 @@
         "mac": "2.2081",
         "ios": "2.2081"
     },
-    "version": "v1.7.13-beta.1",
+    "version": "v2.0.0",
     "id": "hiimjustin000.integrated_demonlist",
-    "name": "Integrated Demonlist",
-    "developer": "hiimjasmine00",
-    "description": "Simple AREDL and Pemonlist integration.",
+    "name": "Integrated Demonlist & Stats",
+    "developers": ["hiimjasmine00", "ItsMochaTheOtter", "TechStudent10"],
+    "description": "AREDL, Pemonlist, and GSV integration",
     "resources": {
         "files": [
             "resources/*.frag",

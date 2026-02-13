@@ -1,4 +1,7 @@
 # Integrated Demonlist Changelog
+## v2.0.0 (TBD)
+- Redesigned the leaderboard page to host the same featues as Global Stats Viewer
+
 ## v1.7.13 (2026-02-10)
 - Ported to Geometry Dash v2.208 / Geode SDK v5.0.0
 
