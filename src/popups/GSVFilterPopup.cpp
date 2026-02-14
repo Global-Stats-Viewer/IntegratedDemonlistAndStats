@@ -182,7 +182,7 @@ bool GSVFilterPopup::init() {
                         "id": 17
                     },
                     {
-                        "sprite": "gsv.integrated-stats-viewer/gauntlet_icon.png", 
+                        "sprite": "hiimjustin000.integrated_demonlist/gauntlet_icon.png", 
                         "id": 18
                     }
                 ]
