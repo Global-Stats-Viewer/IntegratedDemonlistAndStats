@@ -17,7 +17,8 @@
             "resources/*.vert"
         ],
         "sprites": [
-            "resources/*.png"
+            "resources/*.png",
+            "resources/gsv/*.png"
         ],
         "spritesheets": {
             "GSV_Flags": [
