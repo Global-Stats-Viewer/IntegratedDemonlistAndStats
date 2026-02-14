@@ -7,8 +7,8 @@
 #include <Geode/loader/Event.hpp>
 
 #include "GSVLayer.hpp"
-#include "popups/GSVPagePopup.hpp"
-#include "popups/GSVFilterPopup.hpp"
+#include "../popups/GSVPagePopup.hpp"
+#include "../popups/GSVFilterPopup.hpp"
 #include "GSVUtils.hpp"
 
 //geode namespace

@@ -27,7 +27,7 @@ CPMAddPackage("gh:hiimjasmine00/jasmine-tools@1.5.0")
 target_link_libraries(${PROJECT_NAME} jasmine-tools)
 
 ### GSV ###
-CPMAddPackage("gh:dankmeme01/cue#6f49aac")
+CPMAddPackage("gh:dankmeme01/cue#211f644")
 target_link_libraries(${PROJECT_NAME} cue)
 
 setup_geode_mod(${PROJECT_NAME})
