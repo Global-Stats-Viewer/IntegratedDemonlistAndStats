@@ -1,5 +1,5 @@
 # Integrated Demonlist Changelog
-## v1.7.13 (2026-02-10)
+## v1.7.13 (2026-02-14)
 - Ported to Geometry Dash v2.208 / Geode SDK v5.0.0
 
 ## v1.7.12 (2025-10-19)
