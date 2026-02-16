@@ -41,23 +41,25 @@ class $modify(PRProfilePage, ProfilePage) {
         CCParticleSystem* m_mParticleExtra2 = nullptr;
 
         // CONSTS
-        const std::vector<int> POS_CHECK = {1500, 1000, 750, 500, 200, 100, 50, 10, 1, -1};
+        const std::vector<int> POS_CHECK = {10000, 5000, 2500, 1000, 500, 200, 100, 50, 10, 1, -1};
         const std::map<int, ccColor3B> COLOR = {
-            {1500, ccColor3B{ 10, 10, 10 }},
-            {1000, ccColor3B{ 204, 75, 0 }},
-            {750, ccColor3B{ 185, 0, 179 }},
-            {500, ccColor3B{ 26, 160, 255 }},
-            {200, ccColor3B{ 23, 196, 0 }},
-            {100, ccColor3B{ 220, 7, 68 }},
+            {10000, ccColor3B{ 156, 156, 156 }},
+            {5000, ccColor3B{ 157, 102, 243 }},
+            {2500, ccColor3B{ 19, 193, 175 }},
+            {1000, ccColor3B{ 255, 106, 0 }},
+            {500, ccColor3B{ 185, 0, 179 }},
+            {200, ccColor3B{ 26, 160, 255 }},
+            {100, ccColor3B{ 23, 196, 0 }},
             {50, ccColor3B{ 255, 157, 0 }},
             {10, ccColor3B{ 255, 255, 255 }},
             {1, ccColor3B{ 255, 221, 0 }},
             {-1, ccColor3B{ 0, 255, 255 }},
         };
         const std::map<int, int> PARTICLE_COUNT = {
-            {1500, -1},
-            {1000, 5},
-            {750, 6},
+            {10000, -1},
+            {5000, -1},
+            {2500, -1},
+            {1000, -1},
             {500, 7},
             {200, 8},
             {100, 9},
@@ -67,9 +69,10 @@ class $modify(PRProfilePage, ProfilePage) {
             {-1, 13},
         };
         const std::map<int, int> EXTRA_PARTICLE_COUNT = {
-            {1500, -1},
+            {10000, -1},
+            {5000, -1},
+            {2500, -1},
             {1000, -1},
-            {750, -1},
             {500, -1},
             {200, -1},
             {100, -1},
@@ -79,9 +82,10 @@ class $modify(PRProfilePage, ProfilePage) {
             {-1, 30},
         };
         const std::map<int, int> SPARKLE_COUNT = {
-            {1500, -1},
+            {10000, -1},
+            {5000, -1},
+            {2500, -1},
             {1000, -1},
-            {750, -1},
             {500, -1},
             {200, -1},
             {100, -1},
@@ -91,9 +95,6 @@ class $modify(PRProfilePage, ProfilePage) {
             {-1, 4}
         };
     };
-
-    // FEAST your eyes on this MONSTROSITY, CATTO!!!
-    // - Kiba
 
     void rankingSetValues(int pos) { // Merged everything into one function because they're all the same anyways - Mocha
         PRProfilePage* page = this;
