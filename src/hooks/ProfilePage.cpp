@@ -162,10 +162,10 @@ class $modify(PRProfilePage, ProfilePage) {
         float leftLabelX = convertToWorldSpace(tempPos).x - (layerBG->getContentSize().width / 2.f) + 77.f;
         float rightLabelX = winSize.width - leftLabelX;
         
-        // these are set to -1 until we figure out profile stuff - Mocha
-        int creatorPosition = -1; //Manager::getPosition(userID);
-        int demonsPosition = -1; //Manager::getPositionDemons(userID);
-        int moonsPosition = -1; //Manager::getPositionMoons(userID);
+        // these are set to 0 until we figure out profile stuff - Mocha
+        int creatorPosition = 0; //Manager::getPosition(userID);
+        int demonsPosition = 0; //Manager::getPositionDemons(userID);
+        int moonsPosition = 0; //Manager::getPositionMoons(userID);
 
         // Shrink Floor Line
         auto floorLine = static_cast<CCSprite*>(layer->getChildByID("floor-line"));
@@ -177,7 +177,7 @@ class $modify(PRProfilePage, ProfilePage) {
         std::vector<std::string> rankSprites = {"GJ_hammerIcon_001.png", "GJ_starsIcon_001.png", "GJ_demonIcon_001.png", "GJ_moonsIcon_001.png"};
 
         for (int i = 0; i < rankings.size(); i++) {
-            if (rankings[i] < 0) {
+            if (rankings[i] < 1) {
                 if (i / 2 == 1) if (auto prev = layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i - 2]))) prev->setPositionY(layerSize.height * 0.9f);
                 
                 continue; // no need to add this ranking if there's no ranking found

@@ -8,6 +8,4 @@ class PRParticles {
         static CCParticleSystem* trophyGeneral(ccColor3B color, int numParticles);
         static CCParticleSystem* topTrophy0(int numParticles);
         static CCParticleSystem* topTrophySparkles(int numParticles);
-    protected:
-        static CCDictionary* jsonToDict(matjson::Value);
 };

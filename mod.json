@@ -14,7 +14,8 @@
     "resources": {
         "files": [
             "resources/*.frag",
-            "resources/*.vert"
+            "resources/*.vert",
+            "resources/profile-rankings/*.plist"
         ],
         "sprites": [
             "resources/*.png",
