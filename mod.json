@@ -34,6 +34,9 @@
                 "resources/gsv/flags/subdivisions/nl/*.png",
                 "resources/gsv/flags/subdivisions/no/*.png",
                 "resources/gsv/flags/subdivisions/us/*.png"
+            ],
+            "PR_Sprites": [
+                "resources/profile-rankings/*.png"
             ]
         }
     },
