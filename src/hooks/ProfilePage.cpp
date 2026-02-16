@@ -1,8 +1,10 @@
 #include <Geode/Bindings.hpp>
 #include <Geode/modify/ProfilePage.hpp>
 #include <Geode/loader/Loader.hpp>
+#include <matjson.hpp>
 
 #include "../classes/PRParticles.hpp"
+#include "Geode/utils/web.hpp"
 
 using namespace geode::prelude;
 
@@ -40,117 +42,123 @@ class $modify(PRProfilePage, ProfilePage) {
         CCParticleSystem* m_dParticleExtra2 = nullptr;
         CCParticleSystem* m_mParticleExtra2 = nullptr;
 
+        async::TaskHolder<web::WebResponse> m_listener;
+        async::TaskHolder<web::WebResponse> m_listener2;
+        async::TaskHolder<web::WebResponse> m_listener3;
+
+        int m_creatorPosition = 0;
+        int m_moonsPosition = 0;
+        int m_demonsPosition = 0;
+
         // CONSTS
-        const std::vector<int> POS_CHECK = {10000, 5000, 2500, 1000, 500, 200, 100, 50, 10, 1, -1};
-        const std::map<int, ccColor3B> COLOR = {
-            {10000, ccColor3B{ 156, 156, 156 }},
-            {5000, ccColor3B{ 157, 102, 243 }},
-            {2500, ccColor3B{ 19, 193, 175 }},
-            {1000, ccColor3B{ 255, 106, 0 }},
-            {500, ccColor3B{ 185, 0, 179 }},
-            {200, ccColor3B{ 26, 160, 255 }},
-            {100, ccColor3B{ 23, 196, 0 }},
-            {50, ccColor3B{ 255, 157, 0 }},
-            {10, ccColor3B{ 255, 255, 255 }},
-            {1, ccColor3B{ 255, 221, 0 }},
-            {-1, ccColor3B{ 0, 255, 255 }},
-        };
-        const std::map<int, int> PARTICLE_COUNT = {
-            {10000, -1},
-            {5000, -1},
-            {2500, -1},
-            {1000, -1},
-            {500, 7},
-            {200, 8},
-            {100, 9},
-            {50, 10},
-            {10, 11},
-            {1, 12},
-            {-1, 13},
-        };
-        const std::map<int, int> EXTRA_PARTICLE_COUNT = {
-            {10000, -1},
-            {5000, -1},
-            {2500, -1},
-            {1000, -1},
-            {500, -1},
-            {200, -1},
-            {100, -1},
-            {50, 15},
-            {10, 20},
-            {1, 25},
-            {-1, 30},
-        };
-        const std::map<int, int> SPARKLE_COUNT = {
-            {10000, -1},
-            {5000, -1},
-            {2500, -1},
-            {1000, -1},
-            {500, -1},
-            {200, -1},
-            {100, -1},
-            {50, -1},
-            {10, 2},
-            {1, 3},
-            {-1, 4}
+        const std::vector<matjson::Value> RANKS = {
+            matjson::makeObject({
+                {"position", 10000},
+                {"color", ccColor3B{ 156, 156, 156 }},
+                {"particle-count", -1},
+                {"extra-particle-count", -1},
+                {"sparkle-count", -1}
+            }),
+            matjson::makeObject({
+                {"position", 5000},
+                {"color", ccColor3B{ 157, 102, 243 }},
+                {"particle-count", -1},
+                {"extra-particle-count", -1},
+                {"sparkle-count", -1}
+            }),
+            matjson::makeObject({
+                {"position", 2500},
+                {"color", ccColor3B{ 19, 193, 175 }},
+                {"particle-count", -1},
+                {"extra-particle-count", -1},
+                {"sparkle-count", -1}
+            }),
+            matjson::makeObject({
+                {"position", 1000},
+                {"color", ccColor3B{ 255, 106, 0 }},
+                {"particle-count", -1},
+                {"extra-particle-count", -1},
+                {"sparkle-count", -1}
+            }),
+            matjson::makeObject({
+                {"position", 500},
+                {"color", ccColor3B{ 185, 0, 179 }},
+                {"particle-count", 7},
+                {"extra-particle-count", -1},
+                {"sparkle-count", -1}
+            }),
+            matjson::makeObject({
+                {"position", 200},
+                {"color", ccColor3B{ 26, 160, 255 }},
+                {"particle-count", 8},
+                {"extra-particle-count", -1},
+                {"sparkle-count", -1}
+            }),
+            matjson::makeObject({
+                {"position", 100},
+                {"color", ccColor3B{ 23, 196, 0 }},
+                {"particle-count", 9},
+                {"extra-particle-count", -1},
+                {"sparkle-count", -1}
+            }),
+            matjson::makeObject({
+                {"position", 50},
+                {"color", ccColor3B{ 255, 157, 0 }},
+                {"particle-count", 10},
+                {"extra-particle-count", 15},
+                {"sparkle-count", -1}
+            }),
+            matjson::makeObject({
+                {"position", 10},
+                {"color", ccColor3B{ 255, 255, 255 }},
+                {"particle-count", 11},
+                {"extra-particle-count", 20},
+                {"sparkle-count", 2}
+            }),
+            matjson::makeObject({
+                {"position", 1},
+                {"color", ccColor3B{ 255, 221, 0 }},
+                {"particle-count", 12},
+                {"extra-particle-count", 25},
+                {"sparkle-count", 3}
+            }),
+            matjson::makeObject({
+                {"position", -1},
+                {"color", ccColor3B{ 0, 255, 255 }},
+                {"particle-count", 13},
+                {"extra-particle-count", 30},
+                {"sparkle-count", 4}
+            })
         };
     };
 
     void rankingSetValues(int pos) { // Merged everything into one function because they're all the same anyways - Mocha
         PRProfilePage* page = this;
 
-        // get consts
-        auto POS_CHECK = m_fields->POS_CHECK;
-        auto COLOR = m_fields->COLOR;
-        auto PARTICLE_COUNT = m_fields->PARTICLE_COUNT;
-        auto EXTRA_PARTICLE_COUNT = m_fields->EXTRA_PARTICLE_COUNT;
-        auto SPARKLE_COUNT = m_fields->SPARKLE_COUNT;
+        auto RANKS = m_fields->RANKS;
 
-        // i *could* just add m_fields-> before the params but this looks cleaner
+        for (int i = 0; i < RANKS.size(); i++) {
+            auto posCheck = RANKS[i]["position"].as<int>().unwrapOr(-1);
+            auto color = RANKS[i]["color"].as<ccColor3B>().unwrapOr(ccColor3B{ 156, 156, 156 });
+            auto particleCount = RANKS[i]["particle-count"].as<int>().unwrapOr(-1);
+            auto extraParticleCount = RANKS[i]["extra-particle-count"].as<int>().unwrapOr(-1);
+            auto sparkleCount = RANKS[i]["sparkle-count"].as<int>().unwrapOr(-1);
 
-        for (int i = 0; i < POS_CHECK.size(); i++) {
-            if (pos > POS_CHECK[i]) {
+            if (pos > posCheck) {
                 auto spriteName = fmt::format("trophy_{}.png", i);
 
-                page->m_fields->m_cColor = COLOR[POS_CHECK[i]];
+                page->m_fields->m_cColor = color;
                 page->m_fields->m_cTrophy = CCSprite::createWithSpriteFrameName(Mod::get()->expandSpriteName(spriteName).c_str());
-                page->m_fields->m_cParticleBase = (PARTICLE_COUNT[POS_CHECK[i]] > -1) ? PRParticles::trophyGeneral(page->m_fields->m_cColor, PARTICLE_COUNT[POS_CHECK[i]]) : nullptr;
-                page->m_fields->m_cParticleExtra = (EXTRA_PARTICLE_COUNT[POS_CHECK[i]] > -1) ? PRParticles::topTrophy0(EXTRA_PARTICLE_COUNT[POS_CHECK[i]]) : nullptr;
-                page->m_fields->m_cParticleExtra2 = (SPARKLE_COUNT[POS_CHECK[i]] > -1) ? PRParticles::topTrophySparkles(SPARKLE_COUNT[POS_CHECK[i]]) : nullptr;
+                page->m_fields->m_cParticleBase = (particleCount > -1) ? PRParticles::trophyGeneral(color, particleCount) : nullptr;
+                page->m_fields->m_cParticleExtra = (extraParticleCount > -1) ? PRParticles::topTrophy0(extraParticleCount) : nullptr;
+                page->m_fields->m_cParticleExtra2 = (sparkleCount > -1) ? PRParticles::topTrophySparkles(sparkleCount) : nullptr;
 
                 break;
             }
         }
     }
 
-
-    void loadPageFromUserInfo(GJUserScore* score) {
-        ProfilePage::loadPageFromUserInfo(score);
-
-        bool creatorExists = false;
-        bool globalExists = false;
-        bool moonsExists = false;
-        bool demonsExists = false;
-
-        if (auto n = this->m_mainLayer->getChildByID("global-rank-icon")) n->setVisible(false);
-        if (auto n = this->m_mainLayer->getChildByID("global-rank-hint")) n->setVisible(false);
-        if (auto n = this->m_mainLayer->getChildByID("global-rank-label")) n->setVisible(false);
-        if (auto n = this->m_mainLayer->getChildByID("my-stuff-hint")) n->setVisible(false);
-        
-        if (auto btn = typeinfo_cast<CCMenuItemSpriteExtra*>(this->m_mainLayer->getChildByIDRecursive("cvolton.betterinfo/leaderboard-button"))) {
-            btn->removeFromParent();
-            if (auto leftMenu = this->m_mainLayer->getChildByID("left-menu")) {
-                leftMenu->addChild(btn);
-                leftMenu->updateLayout();
-            }
-        }
-
-        if (m_fields->m_hasBeenOpened) {
-            return;
-        }
-
-        m_fields->m_hasBeenOpened = true;
-
+    void updateUserRanks(GJUserScore* score) {
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         auto layerSize = this->m_mainLayer->getContentSize();
         ccBlendFunc blending = {GL_ONE, GL_ONE};
@@ -162,31 +170,22 @@ class $modify(PRProfilePage, ProfilePage) {
         auto tempPos = layerBG->getPosition();
         float leftLabelX = convertToWorldSpace(tempPos).x - (layerBG->getContentSize().width / 2.f) + 77.f;
         float rightLabelX = winSize.width - leftLabelX;
-        
-        // these are set to 0 until we figure out profile stuff - Mocha
-        int creatorPosition = 0; //Manager::getPosition(userID);
-        int demonsPosition = 0; //Manager::getPositionDemons(userID);
-        int moonsPosition = 0; //Manager::getPositionMoons(userID);
 
-        // Shrink Floor Line
-        auto floorLine = static_cast<CCSprite*>(layer->getChildByID("floor-line"));
-        floorLine->setScaleX(0.5f);
-
-        std::vector<int> rankings = {creatorPosition, score->m_globalRank, demonsPosition, moonsPosition};
+        std::vector<int> rankings = {m_fields->m_creatorPosition, score->m_globalRank, m_fields->m_demonsPosition, m_fields->m_moonsPosition};
         std::vector<std::string> rankIDs = {"creator", "global", "demons", "moons"};
         std::vector<std::string> rankTitles = {"Creator", "Global", "Demons", "Moons"};
         std::vector<std::string> rankSprites = {"GJ_hammerIcon_001.png", "GJ_starsIcon_001.png", "GJ_demonIcon_001.png", "GJ_moonsIcon_001.png"};
 
         for (int i = 0; i < rankings.size(); i++) {
-            if (rankings[i] < 1) {
+            if (rankings[i] < 1 || layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i]))) {
                 if (i / 2 == 1) if (auto prev = layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i - 2]))) prev->setPositionY(layerSize.height * 0.9f);
                 
-                continue; // no need to add this ranking if there's no ranking found
+                continue; // no need to add this ranking if there's no ranking found or ranking already exists
             }
 
             auto bg = CCScale9Sprite::create("square02_001.png");
 
-            std::string rankString = fmt::format("# {}", rankings[i]);
+            std::string rankString = fmt::format("# {}", rankings[i] + 1);
             rankingSetValues(rankings[i]);
             
             auto rankColor = this->m_fields->m_cColor;
@@ -264,5 +263,65 @@ class $modify(PRProfilePage, ProfilePage) {
 
             bg->setPositionY(bg->getPositionY() + 1.f);
         }
+    }
+
+    void loadPageFromUserInfo(GJUserScore* score) {
+        ProfilePage::loadPageFromUserInfo(score);
+
+        auto layer = this->m_mainLayer;
+
+        if (auto n = layer->getChildByID("global-rank-icon")) n->setVisible(false);
+        if (auto n = layer->getChildByID("global-rank-hint")) n->setVisible(false);
+        if (auto n = layer->getChildByID("global-rank-label")) n->setVisible(false);
+        if (auto n = layer->getChildByID("my-stuff-hint")) n->setVisible(false);
+        
+        if (auto btn = typeinfo_cast<CCMenuItemSpriteExtra*>(layer->getChildByIDRecursive("cvolton.betterinfo/leaderboard-button"))) {
+            btn->removeFromParent();
+            if (auto leftMenu = layer->getChildByID("left-menu")) {
+                leftMenu->addChild(btn);
+                leftMenu->updateLayout();
+            }
+        }
+
+        if (m_fields->m_hasBeenOpened) {
+            return;
+        }
+
+        m_fields->m_hasBeenOpened = true;
+
+        // Shrink Floor Line
+        auto floorLine = static_cast<CCSprite*>(layer->getChildByID("floor-line"));
+        floorLine->setScaleX(0.5f);
+
+        //initial profile update with global rank
+        updateUserRanks(score);
+
+        /*
+        need to find a better api thing before i can finish this, since:
+        a) classic and platformer demons are seperate, so i would have to use 2 requests to add everything
+        b) + requests for moons & creator points
+        
+        i tried, but there's nothing else i can really do for now - Mocha
+        */
+
+        /*auto req = web::WebRequest();
+        req.param("type", "stars");
+        req.param("version", "1.0");
+        req.param("username", score->m_userName);
+        m_fields->m_listener.spawn(
+            req.get("https://clarifygdps.com/gdutils/moreleaderboards.php"),
+            [&](web::WebResponse value) {
+                if (value.ok() && value.json().isOk()) {
+                    auto data = value.json().unwrapOrDefault();
+
+                    log::info("data: {}", value.string());
+
+                    updateUserRanks(score);
+                }
+                else {
+                    log::error("Server response failed with Code: {}", value.code());
+                }
+            }
+        );*/
     }
 };
