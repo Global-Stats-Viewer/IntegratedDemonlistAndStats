@@ -41,13 +41,13 @@ class $modify(PRProfilePage, ProfilePage) {
         CCParticleSystem* m_mParticleExtra2 = nullptr;
 
         // CONSTS
-        const std::vector<int> POS_CHECK = {1500, 1000, 750, 500, 250, 100, 50, 10, 1, -1};
+        const std::vector<int> POS_CHECK = {1500, 1000, 750, 500, 200, 100, 50, 10, 1, -1};
         const std::map<int, ccColor3B> COLOR = {
             {1500, ccColor3B{ 10, 10, 10 }},
             {1000, ccColor3B{ 204, 75, 0 }},
             {750, ccColor3B{ 185, 0, 179 }},
             {500, ccColor3B{ 26, 160, 255 }},
-            {250, ccColor3B{ 23, 196, 0 }},
+            {200, ccColor3B{ 23, 196, 0 }},
             {100, ccColor3B{ 220, 7, 68 }},
             {50, ccColor3B{ 255, 157, 0 }},
             {10, ccColor3B{ 255, 255, 255 }},
@@ -59,7 +59,7 @@ class $modify(PRProfilePage, ProfilePage) {
             {1000, 5},
             {750, 6},
             {500, 7},
-            {250, 8},
+            {200, 8},
             {100, 9},
             {50, 10},
             {10, 11},
@@ -71,7 +71,7 @@ class $modify(PRProfilePage, ProfilePage) {
             {1000, -1},
             {750, -1},
             {500, -1},
-            {250, -1},
+            {200, -1},
             {100, -1},
             {50, 15},
             {10, 20},
@@ -83,7 +83,7 @@ class $modify(PRProfilePage, ProfilePage) {
             {1000, -1},
             {750, -1},
             {500, -1},
-            {250, -1},
+            {200, -1},
             {100, -1},
             {50, -1},
             {10, 2},
