@@ -185,7 +185,7 @@ class $modify(PRProfilePage, ProfilePage) {
 
             auto bg = CCScale9Sprite::create("square02_001.png");
 
-            std::string rankString = fmt::format("# {}", rankings[i] + 1);
+            std::string rankString = fmt::format("# {}", rankings[i]);
             rankingSetValues(rankings[i]);
             
             auto rankColor = this->m_fields->m_cColor;
