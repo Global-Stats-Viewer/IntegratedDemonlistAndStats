@@ -70,7 +70,7 @@ bool GSVPagePopup::init() {
 void GSVPagePopup::confirmPage(CCObject* sender) {
 
 	GSVLayer* layer = this->getParent()->getChildByType<GSVLayer>(0);
-	int page = clampf(GSVUtils::safe_stoi(m_value->getString()), 1, m_maxPages);
+	int page = clampf(numFromString<int>(m_value->getString()).unwrapOr(1), 1, m_maxPages);
     if (page != m_page) layer->loadUsers(page); //if it's the same page don't bother sending another request
 
 	this->removeMeAndCleanup();
@@ -85,7 +85,7 @@ void GSVPagePopup::resetPage(CCObject* sender) {
 }
 
 void GSVPagePopup::pageLeft(CCObject* sender) {
-	int value = GSVUtils::safe_stoi(m_value->getString());
+	int value = numFromString<int>(m_value->getString()).unwrapOr(1);
 
 	value -= 1;
 	value = std::max(value, 1);
@@ -95,7 +95,7 @@ void GSVPagePopup::pageLeft(CCObject* sender) {
 }
 
 void GSVPagePopup::pageRight(CCObject* sender) {
-	int value = GSVUtils::safe_stoi(m_value->getString());
+	int value = numFromString<int>(m_value->getString()).unwrapOr(1);
 
 	value += 1;
 	value = std::min(value, m_maxPages);

@@ -33,26 +33,6 @@ std::vector<std::string> GSVUtils::substring(std::string s, std::string d) {
 	return res;
 };
 
-int GSVUtils::safe_stoi(std::string input, int fallback) {
-	std::string result = "";
-	std::string allowedChars = "0123456789";
-
-	for (auto c : input) {
-		for (auto ch : allowedChars) {
-			if (c == ch) {
-				result.push_back(c);
-				break;
-			}
-		}
-	}
-
-	if (result.empty()) {
-		return fallback;
-	}
-
-	return std::stoi(result);
-};
-
 std::string GSVUtils::trimUnicode(std::string input, bool strict) {
 	std::string result = "";
 	std::string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-_=+[]{}\\|'\";:.>,</?`~ ";

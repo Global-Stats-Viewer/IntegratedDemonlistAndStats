@@ -3,6 +3,7 @@
 #include <Geode/loader/Loader.hpp>
 #include <matjson.hpp>
 
+#include "../classes/GSVUtils.hpp"
 #include "../classes/PRParticles.hpp"
 #include "Geode/utils/web.hpp"
 
@@ -158,7 +159,7 @@ class $modify(PRProfilePage, ProfilePage) {
         }
     }
 
-    void updateUserRanks(GJUserScore* score) {
+    void updateUserRanks() {
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         auto layerSize = this->m_mainLayer->getContentSize();
         ccBlendFunc blending = {GL_ONE, GL_ONE};
@@ -171,30 +172,31 @@ class $modify(PRProfilePage, ProfilePage) {
         float leftLabelX = convertToWorldSpace(tempPos).x - (layerBG->getContentSize().width / 2.f) + 77.f;
         float rightLabelX = winSize.width - leftLabelX;
 
-        std::vector<int> rankings = {m_fields->m_creatorPosition, score->m_globalRank, m_fields->m_demonsPosition, m_fields->m_moonsPosition};
+        std::vector<int> rankings = {m_fields->m_creatorPosition, m_score->m_globalRank, m_fields->m_demonsPosition, m_fields->m_moonsPosition};
         std::vector<std::string> rankIDs = {"creator", "global", "demons", "moons"};
         std::vector<std::string> rankTitles = {"Creator", "Global", "Demons", "Moons"};
         std::vector<std::string> rankSprites = {"GJ_hammerIcon_001.png", "GJ_starsIcon_001.png", "GJ_demonIcon_001.png", "GJ_moonsIcon_001.png"};
 
         for (int i = 0; i < rankings.size(); i++) {
-            if (rankings[i] < 1 || layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i]))) {
-                if (i / 2 == 1) if (auto prev = layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i - 2]))) prev->setPositionY(layerSize.height * 0.9f);
-                
-                continue; // no need to add this ranking if there's no ranking found or ranking already exists
-            }
+            if (rankings[i] < 1) continue;
+
+            if (i / 2 == 1) if (auto prev = layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i - 2]))) prev->setPositionY(layerSize.height * 0.845f);
+
+            if (layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i]))) continue;
 
             auto bg = CCScale9Sprite::create("square02_001.png");
 
             std::string rankString = fmt::format("# {}", rankings[i]);
             rankingSetValues(rankings[i]);
-            
+             
             auto rankColor = this->m_fields->m_cColor;
             
             bg->setContentSize(labelSize);
             bg->setZOrder(9);
             bg->setPosition({
                 (i % 2 == 0) ? rightLabelX : leftLabelX, 
-                (i / 2 == 1) ? (layerSize.height * 0.9f) : (layerSize.height * 0.845f)});
+                layerSize.height * 0.9f
+            });
             bg->setOpacity(60);
             bg->setID(fmt::format("{}-rank-tab"_spr, rankIDs[i]));
             auto bgScale = bg->getContentSize();
@@ -294,7 +296,7 @@ class $modify(PRProfilePage, ProfilePage) {
         floorLine->setScaleX(0.5f);
 
         //initial profile update with global rank
-        updateUserRanks(score);
+        //updateUserRanks();
 
         /*
         need to find a better api thing before i can finish this, since:
@@ -304,24 +306,126 @@ class $modify(PRProfilePage, ProfilePage) {
         i tried, but there's nothing else i can really do for now - Mocha
         */
 
-        /*auto req = web::WebRequest();
-        req.param("type", "stars");
+        /*
+        https://clarifygdps.com/gdutils/moreleaderboards.php?
+        type=diamonds
+        &country=NAN
+        &page=0
+        &username=
+        &mod=0
+        &modFilter=0
+        &version=1.0
+        */
+
+        auto req = web::WebRequest();
+        req.param("type", "moons");
         req.param("version", "1.0");
-        req.param("username", score->m_userName);
+        req.param("username", m_score->m_userName);
         m_fields->m_listener.spawn(
             req.get("https://clarifygdps.com/gdutils/moreleaderboards.php"),
             [&](web::WebResponse value) {
-                if (value.ok() && value.json().isOk()) {
-                    auto data = value.json().unwrapOrDefault();
+                if (value.ok() && value.string().isOk()) {
+                    auto data = value.string().unwrapOrDefault();
+                    if (data.size() <= 0) return;
 
-                    log::info("data: {}", value.string());
+                    auto scores = GSVUtils::substring(data, "|");
 
-                    updateUserRanks(score);
+                    for (auto s : scores) {
+                        std::vector<std::string> parsedScore = {};
+                        auto splitData = GSVUtils::substring(s, ":");
+
+                        for (int i = 0; i < splitData.size(); i++) {
+                            if (i % 2 == 0) continue;
+
+                            parsedScore.push_back(splitData[i]);
+                        }
+
+                        if (!parsedScore.empty() && parsedScore[0] == m_score->m_userName) {
+                            m_fields->m_moonsPosition = numFromString<int>(parsedScore[4]).unwrapOr(0);
+                            break;
+                        }
+                    }
+
+                    updateUserRanks();
                 }
                 else {
                     log::error("Server response failed with Code: {}", value.code());
                 }
             }
-        );*/
+        );
+
+        auto req2 = web::WebRequest();
+        req2.param("type", "cp");
+        req2.param("version", "1.0");
+        req2.param("username", m_score->m_userName);
+        m_fields->m_listener2.spawn(
+            req2.get("https://clarifygdps.com/gdutils/moreleaderboards.php"),
+            [&](web::WebResponse value) {
+                if (value.ok() && value.string().isOk()) {
+                    auto data = value.string().unwrapOrDefault();
+                    if (data.size() <= 0) return;
+
+                    auto scores = GSVUtils::substring(data, "|");
+
+                    for (auto s : scores) {
+                        std::vector<std::string> parsedScore = {};
+                        auto splitData = GSVUtils::substring(s, ":");
+
+                        for (int i = 0; i < splitData.size(); i++) {
+                            if (i % 2 == 0) continue;
+
+                            parsedScore.push_back(splitData[i]);
+                        }
+
+                        if (!parsedScore.empty() && parsedScore[0] == m_score->m_userName) {
+                            m_fields->m_creatorPosition = numFromString<int>(parsedScore[4]).unwrapOr(0);
+                            break;
+                        }
+                    }
+
+                    updateUserRanks();
+                }
+                else {
+                    log::error("Server response failed with Code: {}", value.code());
+                }
+            }
+        );
+
+        auto req3 = web::WebRequest();
+        req3.param("type", "demons");
+        req3.param("version", "1.0");
+        req3.param("username", m_score->m_userName);
+        m_fields->m_listener3.spawn(
+            req3.get("https://clarifygdps.com/gdutils/moreleaderboards.php"),
+            [&](web::WebResponse value) {
+                if (value.ok() && value.string().isOk()) {
+                    auto data = value.string().unwrapOrDefault();
+                    if (data.size() <= 0) return;
+
+                    auto scores = GSVUtils::substring(data, "|");
+
+                    for (auto s : scores) {
+                        std::vector<std::string> parsedScore = {};
+                        auto splitData = GSVUtils::substring(s, ":");
+
+                        for (int i = 0; i < splitData.size(); i++) {
+                            if (i % 2 == 0) continue;
+
+                            parsedScore.push_back(splitData[i]);
+                        }
+
+                        if (!parsedScore.empty() && parsedScore[0] == m_score->m_userName) {
+                            m_fields->m_demonsPosition = numFromString<int>(parsedScore[4]).unwrapOr(0);
+                            break;
+                        }
+                    }
+
+                    updateUserRanks();
+                }
+                else {
+                    log::error("Server response failed with Code: {}", value.code());
+                }
+            }
+        );
     }
 };
