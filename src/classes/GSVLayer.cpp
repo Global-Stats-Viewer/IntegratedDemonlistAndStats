@@ -641,7 +641,7 @@ void GSVLayer::onLoadUsersFinished(matjson::Value const& data) {
 			{ GSVFilterType::Demons_Extreme, "diffIcon_10_btn_001.png"},
 			{ GSVFilterType::Events_Dailies, "gj_dailyCrown_001.png" },
 			{ GSVFilterType::Events_Weeklies, "gj_weeklyCrown_001.png" },
-			{ GSVFilterType::Events_Gauntlets, "hiimjustin000.integrated_demonlist/gauntlet_icon.png" }
+			{ GSVFilterType::Events_Gauntlets, "island_demon_001.png" }
 		};
 
 		if (Mod::get()->getSavedValue<bool>("gsv-show-stat-icons", true)) {
@@ -651,7 +651,7 @@ void GSVLayer::onLoadUsersFinished(matjson::Value const& data) {
 			// afaik there's no other code in the mod that sets the filter to "-1" - mocha
 
 			auto statIcon = CCSprite::createWithSpriteFrameName(statIconMap[filter.filterType].c_str());
-			if (filter.filterType == GSVFilterType::Events_Gauntlets) statIcon = CCSprite::create("hiimjustin000.integrated_demonlist/gauntlet_icon.png");
+			if (filter.filterType == GSVFilterType::Events_Gauntlets) statIcon = CCSprite::create("island_demon_001.png");
 			if (filter.filterType == GSVFilterType::Stats_Stars && filter.gamemodeType == GSVGamemodeType::Platformer) statIcon = CCSprite::createWithSpriteFrameName("GJ_moonsIcon_001.png");
 			if (filter.gamemodeType == GSVGamemodeType::Creators) statIcon = CCSprite::createWithSpriteFrameName("GJ_hammerIcon_001.png");
 			GSVUtils::scaleToContentSize(statIcon, 18.f, 18.f);

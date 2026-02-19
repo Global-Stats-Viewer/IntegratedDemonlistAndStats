@@ -182,7 +182,7 @@ bool GSVFilterPopup::init() {
                         "id": 17
                     },
                     {
-                        "sprite": "hiimjustin000.integrated_demonlist/gauntlet_icon.png", 
+                        "sprite": "island_demon_001.png", 
                         "id": 18
                     }
                 ]
@@ -235,7 +235,7 @@ bool GSVFilterPopup::init() {
         for (auto f : sectionInfo[sectionIDs[i]]["filters"].as<std::vector<matjson::Value>>().unwrapOr(std::vector<matjson::Value>())) {
             auto filterToggleOnSpr = CCSprite::createWithSpriteFrameName(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
             // vvv TEMPORARY vvv
-            if (f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "gauntlet_icon.png"_spr) filterToggleOnSpr = CCSprite::create(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
+            if (f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "island_demon_001.png") filterToggleOnSpr = CCSprite::create(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
             if (filter.gamemodeType == GSVGamemodeType::Platformer && f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "GJ_bigStar_noShadow_001.png") {
                 //stupid solution but it works so idc
                 filterToggleOnSpr = CCSprite::createWithSpriteFrameName("GJ_moonsIcon_001.png");
@@ -244,7 +244,7 @@ bool GSVFilterPopup::init() {
             
             auto filterToggleOffSpr = CCSprite::createWithSpriteFrameName(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
             // vvv TEMPORARY vvv
-            if (f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "gauntlet_icon.png"_spr) filterToggleOffSpr = CCSprite::create(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
+            if (f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "island_demon_001.png") filterToggleOffSpr = CCSprite::create(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
             if (filter.gamemodeType == GSVGamemodeType::Platformer && f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "GJ_bigStar_noShadow_001.png") {
                 //stupid solution but it works so idc
                 filterToggleOffSpr = CCSprite::createWithSpriteFrameName("GJ_moonsIcon_001.png");
