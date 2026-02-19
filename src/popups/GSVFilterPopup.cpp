@@ -238,6 +238,9 @@ bool GSVFilterPopup::init() {
 
         //finally add the buttons
         for (auto f : sectionInfo[sectionIDs[i]]["filters"].as<std::vector<matjson::Value>>().unwrapOr(std::vector<matjson::Value>())) {
+            //test sprite
+            if (CCSprite::createWithSpriteFrameName(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str()) == nullptr) continue;
+            
             auto filterToggleOnSpr = CCSprite::createWithSpriteFrameName(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
             if (filter.gamemodeType == GSVGamemodeType::Platformer && f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "GJ_bigStar_noShadow_001.png") {
                 //stupid solution but it works so idc
