@@ -651,7 +651,6 @@ void GSVLayer::onLoadUsersFinished(matjson::Value const& data) {
 			// afaik there's no other code in the mod that sets the filter to "-1" - mocha
 
 			auto statIcon = CCSprite::createWithSpriteFrameName(statIconMap[filter.filterType].c_str());
-			if (filter.filterType == GSVFilterType::Events_Gauntlets) statIcon = CCSprite::create("island_demon_001.png");
 			if (filter.filterType == GSVFilterType::Stats_Stars && filter.gamemodeType == GSVGamemodeType::Platformer) statIcon = CCSprite::createWithSpriteFrameName("GJ_moonsIcon_001.png");
 			if (filter.gamemodeType == GSVGamemodeType::Creators) statIcon = CCSprite::createWithSpriteFrameName("GJ_hammerIcon_001.png");
 			GSVUtils::scaleToContentSize(statIcon, 18.f, 18.f);

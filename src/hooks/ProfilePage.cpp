@@ -44,12 +44,13 @@ class $modify(PRProfilePage, ProfilePage) {
         CCParticleSystem* m_mParticleExtra2 = nullptr;
 
         async::TaskHolder<web::WebResponse> m_listener;
-        async::TaskHolder<web::WebResponse> m_listener2;
-        async::TaskHolder<web::WebResponse> m_listener3;
+
+        LoadingCircle* m_loadCircle;
 
         int m_creatorPosition = 0;
         int m_moonsPosition = 0;
         int m_demonsPosition = 0;
+        int m_coinsPosition = 0;
 
         // CONSTS
         const std::vector<matjson::Value> RANKS = {
@@ -172,34 +173,86 @@ class $modify(PRProfilePage, ProfilePage) {
         float leftLabelX = convertToWorldSpace(tempPos).x - (layerBG->getContentSize().width / 2.f) + 77.f;
         float rightLabelX = winSize.width - leftLabelX;
 
-        std::vector<int> rankings = {m_fields->m_creatorPosition, m_score->m_globalRank, m_fields->m_demonsPosition, m_fields->m_moonsPosition};
-        std::vector<std::string> rankIDs = {"creator", "global", "demons", "moons"};
-        std::vector<std::string> rankTitles = {"Creator", "Global", "Demons", "Moons"};
-        std::vector<std::string> rankSprites = {"GJ_hammerIcon_001.png", "GJ_starsIcon_001.png", "GJ_demonIcon_001.png", "GJ_moonsIcon_001.png"};
+        std::vector<matjson::Value> rankings = {
+            matjson::makeObject({
+                {"id", "global"},
+                {"name", "Global"},
+                {"rank", m_score->m_globalRank},
+                {"sprite", "GJ_starsIcon_001.png"}
+            }),
+            matjson::makeObject({
+                {"id", "moons"},
+                {"name", "Moons"},
+                {"rank", m_fields->m_moonsPosition},
+                {"sprite", "GJ_moonsIcon_001.png"}
+            }),
+            matjson::makeObject({
+                {"id", "coins"},
+                {"name", "Coins"},
+                {"rank", m_fields->m_coinsPosition},
+                {"sprite", "GJ_coinsIcon2_001.png"}
+            }),
+            matjson::makeObject({
+                {"id", "demons"},
+                {"name", "Demons"},
+                {"rank", m_fields->m_demonsPosition},
+                {"sprite", "GJ_demonIcon_001.png"}
+            }),
+            matjson::makeObject({
+                {"id", "creator"},
+                {"name", "Creator"},
+                {"rank", m_fields->m_creatorPosition},
+                {"sprite", "GJ_hammerIcon_001.png"}
+            })
+        };
 
-        for (int i = 0; i < rankings.size(); i++) {
-            if (rankings[i] < 1) continue;
+        std::vector<matjson::Value> displayedRankings = {};
 
-            if (i / 2 == 1) if (auto prev = layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i - 2]))) prev->setPositionY(layerSize.height * 0.845f);
+        //decide which stats to show
+        if (rankings[0]["rank"].as<int>().unwrapOr(0) == 0) { // player was lb banned, only show certain stats
+            rankings[1].set("rank", 0);
+            rankings[2].set("rank", 0);
+            rankings[3].set("rank", 0);
+        }
 
-            if (layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankIDs[i]))) continue;
+        for (auto r : rankings) {
+            if (r["rank"].as<int>().unwrapOr(0) == 0) continue;
+            if (displayedRankings.size() >= 4) {
+                if (r["rank"].as<int>().unwrapOr(0) < displayedRankings[2]["rank"].as<int>().unwrapOr(0)) displayedRankings.erase(displayedRankings.begin() + 2);
+                else if (r["rank"].as<int>().unwrapOr(0) < displayedRankings[3]["rank"].as<int>().unwrapOr(0)) displayedRankings.pop_back();
+                else continue;
+            }
+
+            displayedRankings.push_back(r);
+        }
+
+        for (int i = 0; i < displayedRankings.size(); i++) {
+            auto rankID = displayedRankings[i]["id"].asString().unwrapOrDefault();
+            auto name = displayedRankings[i]["name"].asString().unwrapOrDefault();
+            auto value = displayedRankings[i]["rank"].as<int>().unwrapOr(0);
+            auto sprite = displayedRankings[i]["sprite"].asString().unwrapOrDefault();
+            if (rankID.empty() || name.empty() || value == 0 || sprite.empty()) continue;
+
+            if (layer->getChildByID(fmt::format("{}-rank-tab"_spr, rankID))) continue;
 
             auto bg = CCScale9Sprite::create("square02_001.png");
 
-            std::string rankString = fmt::format("# {}", rankings[i]);
-            rankingSetValues(rankings[i]);
+            std::string rankString = fmt::format("# {}", value);
+            rankingSetValues(value);
              
             auto rankColor = this->m_fields->m_cColor;
             
             bg->setContentSize(labelSize);
             bg->setZOrder(9);
             bg->setPosition({
-                (i % 2 == 0) ? rightLabelX : leftLabelX, 
+                (i >= 2) ? rightLabelX : leftLabelX, 
                 layerSize.height * 0.9f
             });
             bg->setOpacity(60);
-            bg->setID(fmt::format("{}-rank-tab"_spr, rankIDs[i]));
+            bg->setID(fmt::format("{}-rank-tab"_spr, rankID));
             auto bgScale = bg->getContentSize();
+
+            if (i % 2 == 1) if (auto prev = layer->getChildByID(fmt::format("{}-rank-tab"_spr, displayedRankings[i - 1]["id"].asString().unwrapOrDefault()))) bg->setPositionY(layerSize.height * 0.845f);
 
             auto border = CCScale9Sprite::createWithSpriteFrameName("border.png"_spr);
             border->setContentSize(labelSize);
@@ -207,11 +260,11 @@ class $modify(PRProfilePage, ProfilePage) {
             border->setPosition(bgScale / 2.f);
             border->setOpacity(200.f);
             border->setColor(rankColor);
-            border->setScaleX(-1.f);
+            border->setScaleX((i >= 2) ? -1.f : 1.f);
             border->setID("rank-border");
             bg->addChild(border);
             
-            auto title = CCLabelBMFont::create(fmt::format("{} Rank:", rankTitles[i]).c_str(), "gjFont05.fnt");
+            auto title = CCLabelBMFont::create(fmt::format("{} Rank:", name).c_str(), "gjFont05.fnt");
             bg->addChild(title);
             title->setScale(0.7f);
             title->setZOrder(12);
@@ -254,7 +307,7 @@ class $modify(PRProfilePage, ProfilePage) {
             }
             
 
-            auto icon = CCSprite::createWithSpriteFrameName(rankSprites[i].c_str());
+            auto icon = CCSprite::createWithSpriteFrameName(sprite.c_str());
             bg->addChild(icon);
             icon->setZOrder(13);
             icon->setScale(0.55f);
@@ -298,31 +351,17 @@ class $modify(PRProfilePage, ProfilePage) {
         //initial profile update with global rank
         //updateUserRanks();
 
-        /*
-        need to find a better api thing before i can finish this, since:
-        a) classic and platformer demons are seperate, so i would have to use 2 requests to add everything
-        b) + requests for moons & creator points
-        
-        i tried, but there's nothing else i can really do for now - Mocha
-        */
-
-        /*
-        https://clarifygdps.com/gdutils/moreleaderboards.php?
-        type=diamonds
-        &country=NAN
-        &page=0
-        &username=
-        &mod=0
-        &modFilter=0
-        &version=1.0
-        */
+        m_fields->m_loadCircle = LoadingCircle::create();
+        m_fields->m_loadCircle->setParentLayer(layer);
+        m_fields->m_loadCircle->setPosition(-141.5f, 120.f);
+        m_fields->m_loadCircle->setScale(0.5f);
+        m_fields->m_loadCircle->show();
 
         auto req = web::WebRequest();
-        req.param("type", "moons");
         req.param("version", "1.0");
         req.param("username", m_score->m_userName);
         m_fields->m_listener.spawn(
-            req.get("https://clarifygdps.com/gdutils/moreleaderboards.php"),
+            req.get("https://clarifygdps.com/gdutils/getrank.php"),
             [&](web::WebResponse value) {
                 if (value.ok() && value.string().isOk()) {
                     auto data = value.string().unwrapOrDefault();
@@ -341,89 +380,31 @@ class $modify(PRProfilePage, ProfilePage) {
                         }
 
                         if (!parsedScore.empty() && parsedScore[0] == m_score->m_userName) {
-                            m_fields->m_moonsPosition = numFromString<int>(parsedScore[4]).unwrapOr(0);
+                            auto ranks = GSVUtils::substring(parsedScore[4], ",");
+                            if (m_score->m_creatorPoints == 0) ranks.insert(ranks.begin() + 5, "0"); // TEMPORARY UNTIL API IS FIXED
+
+                            std::vector<std::string> parsedRanks = {};
+                            for (int i = 0; i < ranks.size(); i++) if (i % 2 == 1) parsedRanks.push_back(ranks[i]);
+
+                            log::info("ranks: {}", ranks);
+                            log::info("parsed ranks: {}", parsedRanks);
+
+                            m_fields->m_moonsPosition = numFromString<int>(parsedRanks[1]).unwrapOr(0);
+                            m_fields->m_creatorPosition = numFromString<int>(parsedRanks[2]).unwrapOr(0);
+                            m_fields->m_demonsPosition = numFromString<int>(parsedRanks[3]).unwrapOr(0);
+                            //skip secret coins
+                            m_fields->m_coinsPosition = numFromString<int>(parsedRanks[5]).unwrapOr(0);
                             break;
                         }
                     }
 
                     updateUserRanks();
+                    m_fields->m_loadCircle->fadeAndRemove();
                 }
                 else {
                     log::error("Server response failed with Code: {}", value.code());
-                }
-            }
-        );
-
-        auto req2 = web::WebRequest();
-        req2.param("type", "cp");
-        req2.param("version", "1.0");
-        req2.param("username", m_score->m_userName);
-        m_fields->m_listener2.spawn(
-            req2.get("https://clarifygdps.com/gdutils/moreleaderboards.php"),
-            [&](web::WebResponse value) {
-                if (value.ok() && value.string().isOk()) {
-                    auto data = value.string().unwrapOrDefault();
-                    if (data.size() <= 0) return;
-
-                    auto scores = GSVUtils::substring(data, "|");
-
-                    for (auto s : scores) {
-                        std::vector<std::string> parsedScore = {};
-                        auto splitData = GSVUtils::substring(s, ":");
-
-                        for (int i = 0; i < splitData.size(); i++) {
-                            if (i % 2 == 0) continue;
-
-                            parsedScore.push_back(splitData[i]);
-                        }
-
-                        if (!parsedScore.empty() && parsedScore[0] == m_score->m_userName) {
-                            m_fields->m_creatorPosition = numFromString<int>(parsedScore[4]).unwrapOr(0);
-                            break;
-                        }
-                    }
-
                     updateUserRanks();
-                }
-                else {
-                    log::error("Server response failed with Code: {}", value.code());
-                }
-            }
-        );
-
-        auto req3 = web::WebRequest();
-        req3.param("type", "demons");
-        req3.param("version", "1.0");
-        req3.param("username", m_score->m_userName);
-        m_fields->m_listener3.spawn(
-            req3.get("https://clarifygdps.com/gdutils/moreleaderboards.php"),
-            [&](web::WebResponse value) {
-                if (value.ok() && value.string().isOk()) {
-                    auto data = value.string().unwrapOrDefault();
-                    if (data.size() <= 0) return;
-
-                    auto scores = GSVUtils::substring(data, "|");
-
-                    for (auto s : scores) {
-                        std::vector<std::string> parsedScore = {};
-                        auto splitData = GSVUtils::substring(s, ":");
-
-                        for (int i = 0; i < splitData.size(); i++) {
-                            if (i % 2 == 0) continue;
-
-                            parsedScore.push_back(splitData[i]);
-                        }
-
-                        if (!parsedScore.empty() && parsedScore[0] == m_score->m_userName) {
-                            m_fields->m_demonsPosition = numFromString<int>(parsedScore[4]).unwrapOr(0);
-                            break;
-                        }
-                    }
-
-                    updateUserRanks();
-                }
-                else {
-                    log::error("Server response failed with Code: {}", value.code());
+                    m_fields->m_loadCircle->fadeAndRemove();
                 }
             }
         );

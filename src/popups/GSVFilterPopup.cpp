@@ -234,8 +234,6 @@ bool GSVFilterPopup::init() {
         //finally add the buttons
         for (auto f : sectionInfo[sectionIDs[i]]["filters"].as<std::vector<matjson::Value>>().unwrapOr(std::vector<matjson::Value>())) {
             auto filterToggleOnSpr = CCSprite::createWithSpriteFrameName(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
-            // vvv TEMPORARY vvv
-            if (f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "island_demon_001.png") filterToggleOnSpr = CCSprite::create(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
             if (filter.gamemodeType == GSVGamemodeType::Platformer && f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "GJ_bigStar_noShadow_001.png") {
                 //stupid solution but it works so idc
                 filterToggleOnSpr = CCSprite::createWithSpriteFrameName("GJ_moonsIcon_001.png");
@@ -243,8 +241,6 @@ bool GSVFilterPopup::init() {
             GSVUtils::scaleToContentSize(filterToggleOnSpr, 40.f, 40.f, 0.9f);
             
             auto filterToggleOffSpr = CCSprite::createWithSpriteFrameName(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
-            // vvv TEMPORARY vvv
-            if (f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "island_demon_001.png") filterToggleOffSpr = CCSprite::create(f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png").c_str());
             if (filter.gamemodeType == GSVGamemodeType::Platformer && f["sprite"].asString().unwrapOr("GJ_moonsIcon_001.png") == "GJ_bigStar_noShadow_001.png") {
                 //stupid solution but it works so idc
                 filterToggleOffSpr = CCSprite::createWithSpriteFrameName("GJ_moonsIcon_001.png");
