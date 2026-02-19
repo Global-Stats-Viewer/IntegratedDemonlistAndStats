@@ -99,6 +99,7 @@ std::string GSVUtils::formatNumber(double input, GSVStatDisplayType type) {
 };
 
 void GSVUtils::scaleToContentSize(cocos2d::CCNode* node, float width, float height, float minScale) {
+	if (!node) return;
 	auto contentSize = node->getContentSize();
 	float scaleX = width / contentSize.width;
 	float scaleY = height / contentSize.height;

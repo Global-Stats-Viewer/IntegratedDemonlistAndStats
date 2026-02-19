@@ -195,6 +195,11 @@ bool GSVFilterPopup::init() {
         sectionInfo["stats"]["filters"][0][0].asString().unwrapOrDefault() = "GJ_moonsIcon_001.png";
     }*/
 
+    /*
+    TODO:
+    FIGURE OUT WHY THE GAUNTLET ICON CRASHES BECAUSE IT DEFINITELY SHOULD NOT
+    */
+
     for (int i = 0; i < sectionIDs.size(); i++) {
         if (filter.gamemodeType == GSVGamemodeType::Creators) { // don't even bother adding filters for the creators section
             auto creatorLabel = CCLabelBMFont::create("Filters are not available for the Creators Tab", "bigFont.fnt");
@@ -245,7 +250,7 @@ bool GSVFilterPopup::init() {
                 //stupid solution but it works so idc
                 filterToggleOffSpr = CCSprite::createWithSpriteFrameName("GJ_moonsIcon_001.png");
             }
-            filterToggleOffSpr->setOpacity(128);
+            filterToggleOffSpr->setOpacity(128.f);
             GSVUtils::scaleToContentSize(filterToggleOffSpr, 40.f, 40.f, 0.9f);
 
             auto filterToggleBtn = CCMenuItemToggler::create(filterToggleOffSpr, filterToggleOnSpr, this, menu_selector(GSVFilterPopup::onSelectFilter));
