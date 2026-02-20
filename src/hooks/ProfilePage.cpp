@@ -51,6 +51,7 @@ class $modify(PRProfilePage, ProfilePage) {
         int m_moonsPosition = 0;
         int m_demonsPosition = 0;
         int m_coinsPosition = 0;
+        int m_pointercratePosition = 0;
 
         // CONSTS
         const std::vector<matjson::Value> RANKS = {
@@ -176,7 +177,7 @@ class $modify(PRProfilePage, ProfilePage) {
         std::vector<matjson::Value> rankings = {
             matjson::makeObject({
                 {"id", "global"},
-                {"name", "Global"},
+                {"name", "Stars"},
                 {"rank", m_score->m_globalRank},
                 {"sprite", "GJ_starsIcon_001.png"}
             }),
@@ -203,6 +204,12 @@ class $modify(PRProfilePage, ProfilePage) {
                 {"name", "Creator"},
                 {"rank", m_fields->m_creatorPosition},
                 {"sprite", "GJ_hammerIcon_001.png"}
+            }),
+            matjson::makeObject({
+                {"id", "pointercrate"},
+                {"name", "Demonlist"},
+                {"rank", m_fields->m_pointercratePosition},
+                {"sprite", "hiimjustin000.integrated_demonlist/resources/profile-rankings/GJ_demonlistIcon_001.png"}
             })
         };
 
@@ -394,6 +401,7 @@ class $modify(PRProfilePage, ProfilePage) {
                             m_fields->m_demonsPosition = numFromString<int>(parsedRanks[3]).unwrapOr(0);
                             //skip secret coins
                             m_fields->m_coinsPosition = numFromString<int>(parsedRanks[5]).unwrapOr(0);
+                            m_fields->m_pointercratePosition = numFromString<int>(parsedRanks[17]).unwrapOr(0);
                             break;
                         }
                     }
