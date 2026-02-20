@@ -177,31 +177,31 @@ class $modify(PRProfilePage, ProfilePage) {
         std::vector<matjson::Value> rankings = {
             matjson::makeObject({
                 {"id", "global"},
-                {"name", "Stars"},
+                {"name", "Stars Rank"},
                 {"rank", m_score->m_globalRank},
                 {"sprite", "GJ_starsIcon_001.png"}
             }),
             matjson::makeObject({
                 {"id", "moons"},
-                {"name", "Moons"},
+                {"name", "Moons Rank"},
                 {"rank", m_fields->m_moonsPosition},
                 {"sprite", "GJ_moonsIcon_001.png"}
             }),
             matjson::makeObject({
                 {"id", "coins"},
-                {"name", "Coins"},
+                {"name", "Coins Rank"},
                 {"rank", m_fields->m_coinsPosition},
                 {"sprite", "GJ_coinsIcon2_001.png"}
             }),
             matjson::makeObject({
                 {"id", "demons"},
-                {"name", "Demons"},
+                {"name", "Demons Rank"},
                 {"rank", m_fields->m_demonsPosition},
                 {"sprite", "GJ_demonIcon_001.png"}
             }),
             matjson::makeObject({
                 {"id", "creator"},
-                {"name", "Creator"},
+                {"name", "Creator Rank"},
                 {"rank", m_fields->m_creatorPosition},
                 {"sprite", "GJ_hammerIcon_001.png"}
             }),
@@ -271,7 +271,7 @@ class $modify(PRProfilePage, ProfilePage) {
             border->setID("rank-border");
             bg->addChild(border);
             
-            auto title = CCLabelBMFont::create(fmt::format("{} Rank:", name).c_str(), "gjFont05.fnt");
+            auto title = CCLabelBMFont::create(fmt::format("{}:", name).c_str(), "gjFont05.fnt");
             bg->addChild(title);
             title->setScale(0.7f);
             title->setZOrder(12);
