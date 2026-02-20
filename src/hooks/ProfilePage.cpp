@@ -209,7 +209,7 @@ class $modify(PRProfilePage, ProfilePage) {
                 {"id", "pointercrate"},
                 {"name", "Demonlist"},
                 {"rank", m_fields->m_pointercratePosition},
-                {"sprite", "hiimjustin000.integrated_demonlist/resources/profile-rankings/GJ_demonlistIcon_001.png"}
+                {"sprite", "GJ_demonlistIcon_001.png"_spr}
             })
         };
 
@@ -401,7 +401,7 @@ class $modify(PRProfilePage, ProfilePage) {
                             m_fields->m_demonsPosition = numFromString<int>(parsedRanks[3]).unwrapOr(0);
                             //skip secret coins
                             m_fields->m_coinsPosition = numFromString<int>(parsedRanks[5]).unwrapOr(0);
-                            m_fields->m_pointercratePosition = numFromString<int>(parsedRanks[17]).unwrapOr(0);
+                            if (!parsedRanks[17].empty()) m_fields->m_pointercratePosition = numFromString<int>(parsedRanks[17]).unwrapOr(0);
                             break;
                         }
                     }
