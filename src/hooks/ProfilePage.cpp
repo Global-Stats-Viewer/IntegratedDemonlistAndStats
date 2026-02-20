@@ -388,7 +388,6 @@ class $modify(PRProfilePage, ProfilePage) {
 
                         if (!parsedScore.empty() && parsedScore[0] == m_score->m_userName) {
                             auto ranks = GSVUtils::substring(parsedScore[4], ",");
-                            if (m_score->m_creatorPoints == 0) ranks.insert(ranks.begin() + 5, "0"); // TEMPORARY UNTIL API IS FIXED
 
                             std::vector<std::string> parsedRanks = {};
                             for (int i = 0; i < ranks.size(); i++) if (i % 2 == 1) parsedRanks.push_back(ranks[i]);
@@ -401,7 +400,7 @@ class $modify(PRProfilePage, ProfilePage) {
                             m_fields->m_demonsPosition = numFromString<int>(parsedRanks[3]).unwrapOr(0);
                             //skip secret coins
                             m_fields->m_coinsPosition = numFromString<int>(parsedRanks[5]).unwrapOr(0);
-                            if (!parsedRanks[17].empty()) m_fields->m_pointercratePosition = numFromString<int>(parsedRanks[17]).unwrapOr(0);
+                            m_fields->m_pointercratePosition = numFromString<int>(parsedRanks[17]).unwrapOr(0);
                             break;
                         }
                     }
