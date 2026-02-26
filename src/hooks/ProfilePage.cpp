@@ -225,8 +225,12 @@ class $modify(PRProfilePage, ProfilePage) {
         for (auto r : rankings) {
             if (r["rank"].as<int>().unwrapOr(0) == 0) continue;
             if (displayedRankings.size() >= 4) {
-                if (r["rank"].as<int>().unwrapOr(0) < displayedRankings[2]["rank"].as<int>().unwrapOr(0)) displayedRankings.erase(displayedRankings.begin() + 2);
-                else if (r["rank"].as<int>().unwrapOr(0) < displayedRankings[3]["rank"].as<int>().unwrapOr(0)) displayedRankings.pop_back();
+                auto rank = r["rank"].as<int>().unwrapOr(0);
+                auto third = displayedRankings[2]["rank"].as<int>().unwrapOr(0);
+                auto fourth = displayedRankings[3]["rank"].as<int>().unwrapOr(0);
+
+                if (rank < third && third >= fourth) displayedRankings.erase(displayedRankings.begin() + 2);
+                else if (rank < fourth && fourth >= third) displayedRankings.pop_back();
                 else continue;
             }
 
